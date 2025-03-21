@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tennis Buchungssystem
 
-## Getting Started
+Eine moderne Web-Anwendung zur Verwaltung von Tennisplatz-Buchungen, entwickelt mit [Next.js](https://nextjs.org).
 
-First, run the development server:
+## Features
+
+- Benutzerfreundliche Buchungsoberfläche
+- Stündliche Zeitslots für Platzbuchungen
+- Admin-Bereich für Einstellungsverwaltung
+- Platzsperren für Wartung oder Turniere
+- Responsive Design für mobile und Desktop-Nutzung
+- Authentifizierung mit JWT
+- SQLite-Datenbank zur einfachen Installation
+
+## Erste Schritte
+
+1. Klone das Repository
+2. Installiere die Abhängigkeiten:
+
+```bash
+npm install
+# oder
+yarn
+# oder
+pnpm install
+# oder
+bun install
+```
+
+3. Starte den Entwicklungsserver:
 
 ```bash
 npm run dev
-# or
+# oder
 yarn dev
-# or
+# oder
 pnpm dev
-# or
+# oder
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Öffne [http://localhost:3001](http://localhost:3001) im Browser, um die Anwendung zu sehen.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Systemanforderungen
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Node.js 20.x oder höher
+- SQLite (wird automatisch eingerichtet)
 
-## Learn More
+## Konfiguration
 
-To learn more about Next.js, take a look at the following resources:
+Die Anwendung verwendet eine SQLite-Datenbank, die automatisch bei erstem Start erstellt wird. Du solltest eine `.env`-Datei mit folgendem Inhalt erstellen:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+JWT_SECRET=dein-geheimer-schlüssel
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Administrationsbereich
 
-## Deploy on Vercel
+Der Administrationsbereich ist unter `/admin` erreichbar und erlaubt:
+- Verwalten der Systemeinstellungen
+- Hinzufügen von Platzsperren
+- Benutzerverwaltung
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Technologie-Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Frontend**: Next.js, React, Tailwind CSS, shadcn/ui
+- **Backend**: Next.js API Routes
+- **Datenbank**: SQLite
+- **Authentifizierung**: JWT (JSON Web Tokens)

@@ -30,7 +30,7 @@ async function isTimeSlotBlocked(courtId: number, date: string, startTime: strin
   const settings = await getSettings()
   if (settings.maintenanceDay && settings.maintenanceTime) {
     const bookingDate = new Date(date)
-    const dayOfWeek = bookingDate.toLocaleLowerCase('en-US', { weekday: 'long' })
+    const dayOfWeek = bookingDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
 
     if (dayOfWeek === settings.maintenanceDay && startTime === settings.maintenanceTime) {
       return true
@@ -197,7 +197,7 @@ export async function POST(request: Request) {
       }
 
       const [hours, minutes] = startTime.split(':')
-      const endTimeDate = new Date(0, 0, 0, parseInt(hours), parseInt(minutes) + 30)
+      const endTimeDate = new Date(0, 0, 0, parseInt(hours) + 1, parseInt(minutes))
       const endTime = endTimeDate.toTimeString().slice(0, 5)
 
       // Überprüfe auf Überschneidungen

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {notifyAuthStateChange} from "@/components/AuthButton";
 import { useToast } from "@/hooks/use-toast"
+import Link from "next/link";
 
 export default function AuthPage() {
   const [email, setEmail] = useState('')
@@ -78,11 +79,20 @@ export default function AuthPage() {
 
           <div>
             <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                type="submit"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Sign in
             </button>
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Noch kein Konto?{' '}
+              <Link href="/auth/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+                Jetzt registrieren
+              </Link>
+            </p>
           </div>
         </form>
       </div>

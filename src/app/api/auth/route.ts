@@ -16,6 +16,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    if (!user.is_active) {
+      return NextResponse.json({
+        error: 'Dein Account wurde noch nicht aktiviert. Bitte warte auf die Freischaltung durch einen Administrator.'
+      }, { status: 403 })
+    }
+
     const passwordMatch = await compare(password, user.password_hash)
 
     if (!passwordMatch) {

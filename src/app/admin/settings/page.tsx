@@ -28,7 +28,7 @@ interface CourtBlock {
 export default function AdminSettingsPage() {
   const { toast } = useToast()
   const [settings, setSettings] = useState({
-    maxBookingDuration: '',
+    maxBookingDuration: '60',
     advanceBookingPeriod: '',
     maxSimultaneousBookings: '',
     openingTime: '08:00',
@@ -135,10 +135,15 @@ export default function AdminSettingsPage() {
         <h1 className="text-3xl font-bold">Admin-Einstellungen</h1>
 
         <Tabs defaultValue="general">
-          <TabsList>
-            <TabsTrigger value="general">Allgemeine Einstellungen</TabsTrigger>
-            <TabsTrigger value="blocks">Platzsperrungen</TabsTrigger>
-          </TabsList>
+          <div className="flex justify-between items-center mb-4">
+            <TabsList>
+              <TabsTrigger value="general">Allgemeine Einstellungen</TabsTrigger>
+              <TabsTrigger value="blocks">Platzsperrungen</TabsTrigger>
+            </TabsList>
+            <Button variant="outline" onClick={() => window.location.href = '/admin/users'}>
+              Benutzerverwaltung
+            </Button>
+          </div>
 
           <TabsContent value="general">
             <Card>

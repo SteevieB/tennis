@@ -12,6 +12,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+function getEndTime(slot: string) {
+    // Extrahiere Stunden und Minuten aus dem Zeitstring
+    const [hours, minutes] = slot.split(':');
+
+    // Berechne die neue Stunde (mit Überlauf für 23:00 → 00:00)
+    const endHour = (parseInt(hours) + 1) % 24;
+
+    // Formatiere die Endzeit im Format HH:MM
+    return `${endHour.toString().padStart(2, '0')}:${minutes}`;
+}
+
 const BookingSlot = ({
                          slot,
                          booking,
@@ -80,7 +91,7 @@ const BookingSlot = ({
                 disabled={isBooked}
             >
                 <div className="flex flex-col items-center space-y-1">
-                    <span className="text-lg">{slot}</span>
+                    <span className="text-lg">{slot} - {getEndTime(slot)}</span>
                     <span className="text-sm">{getBookingStatus()}</span>
                     {isBooked && (
                         currentUser?.isAdmin ? (

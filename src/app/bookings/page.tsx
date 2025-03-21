@@ -36,10 +36,9 @@ const courts = [
   { id: 3, name: '3' },
 ]
 
-const timeSlots = Array.from({ length: 28 }, (_, i) => {
-  const hour = Math.floor(i / 2) + 8
-  const minute = i % 2 === 0 ? '00' : '30'
-  return `${hour.toString().padStart(2, '0')}:${minute}`
+const timeSlots = Array.from({ length: 14 }, (_, i) => {
+  const hour = i + 8
+  return `${hour.toString().padStart(2, '0')}:00`
 })
 
 export default function BookingsPage() {
@@ -169,7 +168,7 @@ export default function BookingsPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Tennisplatzbuchung</h1>
           {currentUser?.isAdmin && (
-              <Button variant="outline" onClick={() => router.push('/admin')}>
+              <Button variant="outline" onClick={() => router.push('/admin/settings')}>
                 Admin-Bereich
               </Button>
           )}
