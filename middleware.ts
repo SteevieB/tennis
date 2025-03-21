@@ -18,6 +18,11 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/bookings/:path*', '/admin/:path*', '/api/(bookings|settings|users)/:path*'],
+  matcher: [
+    '/bookings/create/:path*',
+    '/admin/:path*',
+    '/api/bookings/:path*',
+    '/api/settings/:path*',
+    '/api/users/:path*'
+  ],
 }
-

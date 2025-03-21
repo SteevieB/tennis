@@ -196,6 +196,34 @@ export async function POST(request: Request) {
         )
       }
 
+      // Prüfe, ob das Datum in der Vergangenheit liegt
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const bookingDate = new Date(date)
+      bookingDate.setHours(0, 0, 0, 0)
+
+      if (bookingDate < today) {
+        return NextResponse.json(
+            { error: 'Buchungen in der Vergangenheit sind nicht möglich' },
+            { status: 400 }
+        )
+      }
+
+      // Wenn Datum heute ist, prüfe ob die Startzeit bereits vergangen ist
+      //if (bookingDate.getDate() === today.getDate()) {
+      //  const now = new Date()
+      //  const [hours, minutes] = startTime.split(':').map(Number)
+      //  const bookingTime = new Date()
+      //  bookingTime.setHours(hours, minutes, 0, 0)
+
+      //  if (bookingTime < now) {
+      //    return NextResponse.json(
+      //        { error: 'Die gewählte Buchungszeit liegt in der Vergangenheit' },
+      //        { status: 400 }
+      //    )
+      //  }
+      //}
+
       const [hours, minutes] = startTime.split(':')
       const endTimeDate = new Date(0, 0, 0, parseInt(hours) + 1, parseInt(minutes))
       const endTime = endTimeDate.toTimeString().slice(0, 5)
@@ -289,6 +317,34 @@ export async function DELETE(request: Request) {
             { status: 404 }
         )
       }
+
+      // Prüfe, ob die Buchung in der Vergangenheit liegt
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const bookingDate = new Date(booking.date)
+      bookingDate.setHours(0, 0, 0, 0)
+
+      if (bookingDate < today) {
+        return NextResponse.json(
+            { error: 'Buchungen in der Vergangenheit können nicht storniert werden' },
+            { status: 400 }
+        )
+      }
+
+      //// Wenn Datum heute ist, prüfe ob die Startzeit bereits vergangen ist
+      //if (bookingDate.getTime() === today.getTime()) {
+      //  const now = new Date()
+      //  const [hours, minutes] = booking.start_time.split(':').map(Number)
+      //  const bookingTime = new Date()
+      //  bookingTime.setHours(hours, minutes, 0, 0)
+//
+      //  if (bookingTime < now) {
+      //    return NextResponse.json(
+      //        { error: 'Vergangene Buchungen können nicht storniert werden' },
+      //        { status: 400 }
+      //    )
+      //  }
+      //}
 
       // Check if user is authorized to delete the booking
       if (!decoded.isAdmin && booking.user_id !== decoded.userId) {

@@ -42,18 +42,24 @@ const timeSlots = Array.from({ length: 14 }, (_, i) => {
 })
 
 export default function BookingsPage() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const [selectedDate, setSelectedDate] = useState(today)
   const [selectedCourt, setSelectedCourt] = useState(courts[0])
-  const [selectedDate, setSelectedDate] = useState(new Date())
   const [bookings, setBookings] = useState<Booking[]>([])
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [settings, setSettings] = useState<Settings | null>(null)
   const router = useRouter()
   const { toast } = useToast()
 
+
   useEffect(() => {
     fetchCurrentUser()
+  }, [])
+
+  useEffect(() => {
     fetchBookings()
-  }, [selectedCourt, selectedDate])
+  }, [selectedCourt, selectedDate, currentUser])
 
   const fetchCurrentUser = async () => {
     try {
@@ -62,27 +68,38 @@ export default function BookingsPage() {
         const data = await response.json()
         setCurrentUser(data)
       } else {
-        console.error('Failed to fetch current user')
+        // Entferne die console.error-Meldung und setze einfach currentUser auf null
         setCurrentUser(null)
       }
     } catch (error) {
-      console.error('Error fetching current user:', error)
+      // Entferne auch hier die console.error-Meldung
       setCurrentUser(null)
     }
   }
 
   const fetchBookings = async () => {
     try {
+      // Stelle sicher, dass das Datum im korrekten Format ist
+      // Format: YYYY-MM-DD
       const formattedDate = selectedDate.toISOString().split('T')[0]
-      const response = await fetch(`/api/bookings?courtId=${selectedCourt.id}&date=${formattedDate}`)
+      console.log("Fetching bookings for date:", formattedDate); // Logging zur Fehlersuche
+
+      const endpoint = currentUser
+          ? `/api/bookings?courtId=${selectedCourt.id}&date=${formattedDate}`
+          : `/api/public/bookings?courtId=${selectedCourt.id}&date=${formattedDate}`
+
+      console.log("API endpoint:", endpoint); // Logging zur Fehlersuche
+
+      const response = await fetch(endpoint)
+
       if (response.ok) {
         const data = await response.json()
+        console.log("Received booking data:", data); // Logging zur Fehlersuche
         setBookings(data.bookings || [])
         setSettings(data.settings || null)
       } else {
         setBookings([])
         setSettings(null)
-        console.error('Failed to fetch bookings')
       }
     } catch (error) {
       console.error('Error fetching bookings:', error)
@@ -167,11 +184,11 @@ export default function BookingsPage() {
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Tennisplatzbuchung</h1>
-          {currentUser?.isAdmin && (
+          {currentUser?.isAdmin ? (
               <Button variant="outline" onClick={() => router.push('/admin/settings')}>
                 Admin-Bereich
               </Button>
-          )}
+          ) : null}
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
@@ -216,6 +233,7 @@ export default function BookingsPage() {
                   mode="single"
                   selected={selectedDate}
                   onSelect={(date) => date && setSelectedDate(date)}
+                  disabled={(date) => date < today}
                   className="rounded-md border"
               />
             </CardContent>

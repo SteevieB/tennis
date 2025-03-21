@@ -35,8 +35,9 @@ const BookingSlot = ({
     const [isOpen, setIsOpen] = React.useState(false);
     const [selectedType, setSelectedType] = React.useState('regular');
 
-    const isOwnBooking = booking && booking.user_id === currentUser?.id;
+    const isOwnBooking = currentUser && booking && booking.user_id === currentUser.id;
     const bookingType = booking?.type || 'regular';
+    const canBookSlot = !!currentUser && !isBooked;
 
     const handleBook = () => {
         if (currentUser?.isAdmin) {
@@ -77,7 +78,7 @@ const BookingSlot = ({
         if (bookingType === 'tournament') {
             return 'Turnier';
         }
-        if (isOwnBooking && !currentUser?.isAdmin) {
+        if (isOwnBooking) {
             return 'Meine Buchung';
         }
         return 'Belegt';
@@ -87,8 +88,8 @@ const BookingSlot = ({
         <div className="relative">
             <button
                 className={`w-full p-3 rounded-lg font-medium transition-colors ${getSlotStyle()}`}
-                onClick={() => !isBooked && handleBook()}
-                disabled={isBooked}
+                onClick={() => !isBooked && currentUser && handleBook()}
+                disabled={isBooked || !currentUser}
             >
                 <div className="flex flex-col items-center space-y-1">
                     <span className="text-lg">{slot} - {getEndTime(slot)}</span>
