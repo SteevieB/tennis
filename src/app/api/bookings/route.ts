@@ -1,4 +1,3 @@
-// src/app/api/bookings/route.ts
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { verify } from 'jsonwebtoken'
@@ -11,6 +10,70 @@ const bookingSchema = z.object({
   startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/),
   type: z.enum(['regular', 'tournament', 'maintenance']).default('regular')
 })
+
+async function getSettings() {
+  return await db.get('SELECT * FROM settings LIMIT 1')
+}
+
+async function isTimeSlotBlocked(courtId: number, date: string, startTime: string) {
+  // Überprüfe Court Blocks
+  const blockExists = await db.get(
+      `SELECT 1 FROM court_blocks 
+     WHERE court_id = ? 
+     AND ? BETWEEN start_date AND end_date`,
+      [courtId, date]
+  )
+
+  if (blockExists) return true
+
+  // Überprüfe Wartungszeiten
+  const settings = await getSettings()
+  if (settings.maintenanceDay && settings.maintenanceTime) {
+    const bookingDate = new Date(date)
+    const dayOfWeek = bookingDate.toLocaleLowerCase('en-US', { weekday: 'long' })
+
+    if (dayOfWeek === settings.maintenanceDay && startTime === settings.maintenanceTime) {
+      return true
+    }
+  }
+
+  // Überprüfe Öffnungszeiten
+  if (settings.openingTime && settings.closingTime) {
+    if (startTime < settings.openingTime || startTime >= settings.closingTime) {
+      return true
+    }
+  }
+
+  return false
+}
+
+async function validateBooking(userId: number, date: string, settings: any) {
+  // Überprüfe maximale gleichzeitige Buchungen
+  if (settings.maxSimultaneousBookings) {
+    const activeBookings = await db.get(
+        `SELECT COUNT(*) as count FROM bookings 
+       WHERE user_id = ? 
+       AND date >= date('now') 
+       AND type = 'regular'`,
+        [userId]
+    )
+
+    if (activeBookings.count >= settings.maxSimultaneousBookings) {
+      throw new Error('Maximale Anzahl gleichzeitiger Buchungen erreicht')
+    }
+  }
+
+  // Überprüfe Vorausbuchungszeitraum
+  if (settings.advanceBookingPeriod) {
+    const maxDate = new Date()
+    maxDate.setDate(maxDate.getDate() + parseInt(settings.advanceBookingPeriod))
+    const bookingDate = new Date(date)
+
+    if (bookingDate > maxDate) {
+      throw new Error(`Buchungen sind nur ${settings.advanceBookingPeriod} Tage im Voraus möglich`)
+    }
+  }
+}
 
 export async function GET(request: Request) {
   try {
@@ -29,7 +92,10 @@ export async function GET(request: Request) {
     const token = cookieStore.get('token')?.value
 
     if (!token) {
-      return NextResponse.json({ error: 'Du bist nicht eingeloggt!' }, { status: 401 })
+      return NextResponse.json(
+          { error: 'Du bist nicht eingeloggt!' },
+          { status: 401 }
+      )
     }
 
     try {
@@ -37,16 +103,35 @@ export async function GET(request: Request) {
 
       // Join with users table to get user names
       const bookings = await db.all(
-          `SELECT
-             b.*,
-             u.name as user_name
-           FROM bookings b
-                  JOIN users u ON b.user_id = u.id
-           WHERE b.court_id = ? AND b.date = ?`,
+          `SELECT 
+           b.*,
+           u.name as user_name
+         FROM bookings b
+           JOIN users u ON b.user_id = u.id
+         WHERE b.court_id = ? AND b.date = ?`,
           [courtId, date]
       )
 
-      return NextResponse.json(bookings)
+      // Hole Sperrzeiten und Wartungszeiten
+      const blocks = await db.all(
+          `SELECT * FROM court_blocks 
+         WHERE court_id = ? 
+         AND ? BETWEEN start_date AND end_date`,
+          [courtId, date]
+      )
+
+      const settings = await getSettings()
+
+      return NextResponse.json({
+        bookings,
+        blocks,
+        settings: {
+          openingTime: settings.openingTime,
+          closingTime: settings.closingTime,
+          maintenanceDay: settings.maintenanceDay,
+          maintenanceTime: settings.maintenanceTime
+        }
+      })
     } catch (err: any) {
       if (err.name === 'TokenExpiredError') {
         return NextResponse.json(
@@ -71,7 +156,10 @@ export async function POST(request: Request) {
     const token = cookieStore.get('token')?.value
 
     if (!token) {
-      return NextResponse.json({ error: 'Du bist nicht eingeloggt!' }, { status: 401 })
+      return NextResponse.json(
+          { error: 'Du bist nicht eingeloggt!' },
+          { status: 401 }
+      )
     }
 
     try {
@@ -87,39 +175,62 @@ export async function POST(request: Request) {
       }
 
       const { courtId, date, startTime, type } = result.data
+      const settings = await getSettings()
+
+      // Validiere die Buchung
+      try {
+        await validateBooking(decoded.userId, date, settings)
+      } catch (error: any) {
+        return NextResponse.json(
+            { error: error.message },
+            { status: 400 }
+        )
+      }
+
+      // Überprüfe ob der Zeitslot blockiert ist
+      const isBlocked = await isTimeSlotBlocked(courtId, date, startTime)
+      if (isBlocked) {
+        return NextResponse.json(
+            { error: 'Dieser Zeitslot ist nicht verfügbar' },
+            { status: 400 }
+        )
+      }
 
       const [hours, minutes] = startTime.split(':')
       const endTimeDate = new Date(0, 0, 0, parseInt(hours), parseInt(minutes) + 30)
       const endTime = endTimeDate.toTimeString().slice(0, 5)
 
+      // Überprüfe auf Überschneidungen
       const existingBooking = await db.get(
           `SELECT * FROM bookings
-           WHERE court_id = ?
-             AND date = ?
-             AND (
-               (start_time <= ? AND end_time > ?)
-              OR
-               (start_time < ? AND end_time >= ?)
-             )`,
+         WHERE court_id = ?
+           AND date = ?
+           AND (
+             (start_time <= ? AND end_time > ?)
+             OR
+             (start_time < ? AND end_time >= ?)
+           )`,
           [courtId, date, startTime, startTime, endTime, endTime]
       )
 
       if (existingBooking) {
         return NextResponse.json(
-            { error: 'Der Platz ist schon belegt!' },
+            { error: 'Der Platz ist für diesen Zeitraum bereits gebucht!' },
             { status: 400 }
         )
       }
 
+      // Erstelle die Buchung
       await db.run(
           `INSERT INTO bookings (
-            court_id,
-            user_id,
-            date,
-            start_time,
-            end_time
-          ) VALUES (?, ?, ?, ?, ?)`,
-          [courtId, decoded.userId, date, startTime, endTime]
+          court_id,
+          user_id,
+          date,
+          start_time,
+          end_time,
+          type
+        ) VALUES (?, ?, ?, ?, ?, ?)`,
+          [courtId, decoded.userId, date, startTime, endTime, type]
       )
 
       return NextResponse.json({
@@ -150,14 +261,20 @@ export async function DELETE(request: Request) {
     const bookingId = searchParams.get('id')
 
     if (!bookingId) {
-      return NextResponse.json({ error: 'Missing booking ID' }, { status: 400 })
+      return NextResponse.json(
+          { error: 'Missing booking ID' },
+          { status: 400 }
+      )
     }
 
     const cookieStore = await cookies()
     const token = cookieStore.get('token')?.value
 
     if (!token) {
-      return NextResponse.json({ error: 'Du bist nicht eingeloggt!' }, { status: 401 })
+      return NextResponse.json(
+          { error: 'Du bist nicht eingeloggt!' },
+          { status: 401 }
+      )
     }
 
     try {
@@ -167,7 +284,10 @@ export async function DELETE(request: Request) {
       const booking = await db.get('SELECT * FROM bookings WHERE id = ?', [bookingId])
 
       if (!booking) {
-        return NextResponse.json({ error: 'Buchung nicht gefunden' }, { status: 404 })
+        return NextResponse.json(
+            { error: 'Buchung nicht gefunden' },
+            { status: 404 }
+        )
       }
 
       // Check if user is authorized to delete the booking
