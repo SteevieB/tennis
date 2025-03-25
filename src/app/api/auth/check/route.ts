@@ -5,7 +5,8 @@ import { verify } from 'jsonwebtoken'
 
 export async function GET() {
   try {
-    const token = (await cookies()).get('token')
+    const cookieStore = await cookies()
+    const token = cookieStore.get('token')
 
     if (!token) {
       return NextResponse.json({ error: 'No token found' }, { status: 401 })
@@ -13,7 +14,7 @@ export async function GET() {
 
     verify(token.value, process.env.JWT_SECRET!)
     return NextResponse.json({ authenticated: true })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
   }
 }

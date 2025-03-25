@@ -2,6 +2,15 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
+interface Settings {
+  openingTime?: string;
+  closingTime?: string;
+  maintenanceDay?: string;
+  maintenanceTime?: string;
+  maxSimultaneousBookings?: number;
+  advanceBookingPeriod?: string;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -32,7 +41,7 @@ export async function GET(request: Request) {
         [courtId, date]
     )
 
-    const settings = await db.get('SELECT * FROM settings LIMIT 1')
+    const settings = await db.get('SELECT * FROM settings LIMIT 1') as Settings | undefined;
 
     return NextResponse.json({
       bookings,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -39,11 +39,7 @@ export default function AdminUsersPage() {
   const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null)
   const { toast } = useToast()
 
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch('/api/users')
@@ -67,7 +63,11 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
 
   const handleToggleUserStatus = async (user: User, activate: boolean) => {
     try {
@@ -192,7 +192,7 @@ export default function AdminUsersPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Benutzer freischalten</AlertDialogTitle>
               <AlertDialogDescription>
-                Möchtest du den Benutzer "{userToActivate?.name}" wirklich freischalten?
+                Möchtest du den Benutzer &ldquo;{userToActivate?.name}&rdquo; wirklich freischalten?
                 Nach der Freischaltung kann sich der Benutzer anmelden und Plätze buchen.
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -217,7 +217,7 @@ export default function AdminUsersPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Benutzer deaktivieren</AlertDialogTitle>
               <AlertDialogDescription>
-                Möchtest du den Benutzer "{userToDeactivate?.name}" wirklich deaktivieren?
+                Möchtest du den Benutzer &ldquo;{userToDeactivate?.name}&rdquo; wirklich deaktivieren?
                 Nach der Deaktivierung kann sich der Benutzer nicht mehr anmelden.
               </AlertDialogDescription>
             </AlertDialogHeader>

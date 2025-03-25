@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Booking, User } from '@/types';
 
 function getEndTime(slot: string) {
     // Extrahiere Stunden und Minuten aus dem Zeitstring
@@ -23,22 +24,30 @@ function getEndTime(slot: string) {
     return `${endHour.toString().padStart(2, '0')}:${minutes}`;
 }
 
-const BookingSlot = ({
-                         slot,
-                         booking,
-                         isBooked,
-                         currentUser,
-                         onBook,
-                         onCancel,
-                         canCancel
+interface BookingSlotProps {
+    slot: string;
+    booking: Booking | null | undefined;
+    isBooked: boolean;
+    currentUser: User | null;
+    onBook: (slot: string, type: string) => void;
+    onCancel: (bookingId: number) => void;
+    canCancel: (booking: Booking | null) => boolean;
+}
+
+const BookingSlot: React.FC<BookingSlotProps> = ({
+                                                     slot,
+                                                     booking,
+                                                     isBooked,
+                                                     currentUser,
+                                                     onBook,
+                                                     onCancel,
+                                                     canCancel
                      }) => {
     const [isOpen, setIsOpen] = React.useState(false);
     const [selectedType, setSelectedType] = React.useState('regular');
 
     const isOwnBooking = currentUser && booking && booking.user_id === currentUser.id;
     const bookingType = booking?.type || 'regular';
-    const canBookSlot = !!currentUser && !isBooked;
-
     const handleBook = () => {
         if (currentUser?.isAdmin) {
             setIsOpen(true);
@@ -96,13 +105,13 @@ const BookingSlot = ({
                     <span className="text-sm">{getBookingStatus()}</span>
                     {isBooked && (
                         currentUser?.isAdmin ? (
-                            booking.user_name && <span className="text-sm font-normal">{booking.user_name}</span>
+                            booking?.user_name && <span className="text-sm font-normal">{booking.user_name}</span>
                         ) : (<span className="text-sm"></span>)
                     )}
                 </div>
             </button>
 
-            {isBooked && canCancel(booking) && (
+            {isBooked && booking && canCancel(booking) && (
                 <button
                     onClick={() => onCancel(booking.id)}
                     className="absolute top-1 right-1 p-1 rounded-full hover:bg-gray-300 bg-white/80"

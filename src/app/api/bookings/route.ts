@@ -11,16 +11,46 @@ const bookingSchema = z.object({
   type: z.enum(['regular', 'tournament', 'maintenance']).default('regular')
 })
 
-async function getSettings() {
-  return await db.get('SELECT * FROM settings LIMIT 1')
+// Typdefinitionen
+interface Settings {
+  openingTime?: string;
+  closingTime?: string;
+  maintenanceDay?: string;
+  maintenanceTime?: string;
+  maxSimultaneousBookings?: number;
+  advanceBookingPeriod?: string;
 }
 
-async function isTimeSlotBlocked(courtId: number, date: string, startTime: string) {
+interface Booking {
+  id: number;
+  court_id: number;
+  user_id: number;
+  date: string;
+  start_time: string;
+  end_time: string;
+  type: string;
+}
+
+interface DecodedToken {
+  userId: number;
+  isAdmin?: boolean;
+}
+
+interface BookingCount {
+  count: number;
+}
+
+async function getSettings(): Promise<Settings> {
+  const settings = await db.get('SELECT * FROM settings LIMIT 1') as Settings | undefined;
+  return settings || {} as Settings;
+}
+
+async function isTimeSlotBlocked(courtId: number, date: string, startTime: string): Promise<boolean> {
   // Überprüfe Court Blocks
   const blockExists = await db.get(
-      `SELECT 1 FROM court_blocks 
-     WHERE court_id = ? 
-     AND ? BETWEEN start_date AND end_date`,
+      `SELECT 1 FROM court_blocks
+       WHERE court_id = ?
+         AND ? BETWEEN start_date AND end_date`,
       [courtId, date]
   )
 
@@ -47,18 +77,18 @@ async function isTimeSlotBlocked(courtId: number, date: string, startTime: strin
   return false
 }
 
-async function validateBooking(userId: number, date: string, settings: any) {
+async function validateBooking(userId: number, date: string, settings: Settings): Promise<void> {
   // Überprüfe maximale gleichzeitige Buchungen
   if (settings.maxSimultaneousBookings) {
-    const activeBookings = await db.get(
-        `SELECT COUNT(*) as count FROM bookings 
-       WHERE user_id = ? 
-       AND date >= date('now') 
-       AND type = 'regular'`,
+    const activeBookings = await db.get<BookingCount>(
+        `SELECT COUNT(*) as count FROM bookings
+         WHERE user_id = ?
+           AND date >= date('now')
+           AND type = 'regular'`,
         [userId]
     )
 
-    if (activeBookings.count >= settings.maxSimultaneousBookings) {
+    if (activeBookings && activeBookings.count >= settings.maxSimultaneousBookings) {
       throw new Error('Maximale Anzahl gleichzeitiger Buchungen erreicht')
     }
   }
@@ -99,24 +129,25 @@ export async function GET(request: Request) {
     }
 
     try {
-      const decoded = verify(token, process.env.JWT_SECRET!) as { userId: number; isAdmin: boolean }
+      // Verifiziere das Token, ohne die Variable zu speichern wenn wir sie nicht verwenden
+      verify(token, process.env.JWT_SECRET!)
 
       // Join with users table to get user names
       const bookings = await db.all(
-          `SELECT 
-           b.*,
-           u.name as user_name
-         FROM bookings b
-           JOIN users u ON b.user_id = u.id
-         WHERE b.court_id = ? AND b.date = ?`,
+          `SELECT
+             b.*,
+             u.name as user_name
+           FROM bookings b
+                  JOIN users u ON b.user_id = u.id
+           WHERE b.court_id = ? AND b.date = ?`,
           [courtId, date]
       )
 
       // Hole Sperrzeiten und Wartungszeiten
       const blocks = await db.all(
-          `SELECT * FROM court_blocks 
-         WHERE court_id = ? 
-         AND ? BETWEEN start_date AND end_date`,
+          `SELECT * FROM court_blocks
+           WHERE court_id = ?
+             AND ? BETWEEN start_date AND end_date`,
           [courtId, date]
       )
 
@@ -132,8 +163,9 @@ export async function GET(request: Request) {
           maintenanceTime: settings.maintenanceTime
         }
       })
-    } catch (err: any) {
-      if (err.name === 'TokenExpiredError') {
+    } catch (err: unknown) {
+      const error = err as Error & { name?: string }
+      if (error.name === 'TokenExpiredError') {
         return NextResponse.json(
             { error: 'Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.' },
             { status: 401 }
@@ -163,7 +195,7 @@ export async function POST(request: Request) {
     }
 
     try {
-      const decoded = verify(token, process.env.JWT_SECRET!) as { userId: number }
+      const decoded = verify(token, process.env.JWT_SECRET!) as DecodedToken
       const body = await request.json()
 
       const result = bookingSchema.safeParse(body)
@@ -180,9 +212,10 @@ export async function POST(request: Request) {
       // Validiere die Buchung
       try {
         await validateBooking(decoded.userId, date, settings)
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const err = error as Error
         return NextResponse.json(
-            { error: error.message },
+            { error: err.message },
             { status: 400 }
         )
       }
@@ -209,21 +242,6 @@ export async function POST(request: Request) {
         )
       }
 
-      // Wenn Datum heute ist, prüfe ob die Startzeit bereits vergangen ist
-      //if (bookingDate.getDate() === today.getDate()) {
-      //  const now = new Date()
-      //  const [hours, minutes] = startTime.split(':').map(Number)
-      //  const bookingTime = new Date()
-      //  bookingTime.setHours(hours, minutes, 0, 0)
-
-      //  if (bookingTime < now) {
-      //    return NextResponse.json(
-      //        { error: 'Die gewählte Buchungszeit liegt in der Vergangenheit' },
-      //        { status: 400 }
-      //    )
-      //  }
-      //}
-
       const [hours, minutes] = startTime.split(':')
       const endTimeDate = new Date(0, 0, 0, parseInt(hours) + 1, parseInt(minutes))
       const endTime = endTimeDate.toTimeString().slice(0, 5)
@@ -231,13 +249,13 @@ export async function POST(request: Request) {
       // Überprüfe auf Überschneidungen
       const existingBooking = await db.get(
           `SELECT * FROM bookings
-         WHERE court_id = ?
-           AND date = ?
-           AND (
-             (start_time <= ? AND end_time > ?)
-             OR
-             (start_time < ? AND end_time >= ?)
-           )`,
+           WHERE court_id = ?
+             AND date = ?
+             AND (
+               (start_time <= ? AND end_time > ?)
+              OR
+               (start_time < ? AND end_time >= ?)
+             )`,
           [courtId, date, startTime, startTime, endTime, endTime]
       )
 
@@ -251,13 +269,13 @@ export async function POST(request: Request) {
       // Erstelle die Buchung
       await db.run(
           `INSERT INTO bookings (
-          court_id,
-          user_id,
-          date,
-          start_time,
-          end_time,
-          type
-        ) VALUES (?, ?, ?, ?, ?, ?)`,
+            court_id,
+            user_id,
+            date,
+            start_time,
+            end_time,
+            type
+          ) VALUES (?, ?, ?, ?, ?, ?)`,
           [courtId, decoded.userId, date, startTime, endTime, type]
       )
 
@@ -265,8 +283,9 @@ export async function POST(request: Request) {
         success: true,
         message: 'Tennisplatz erfolgreich gebucht'
       })
-    } catch (err: any) {
-      if (err.name === 'TokenExpiredError') {
+    } catch (err: unknown) {
+      const error = err as Error & { name?: string }
+      if (error.name === 'TokenExpiredError') {
         return NextResponse.json(
             { error: 'Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.' },
             { status: 401 }
@@ -306,10 +325,10 @@ export async function DELETE(request: Request) {
     }
 
     try {
-      const decoded = verify(token, process.env.JWT_SECRET!) as { userId: number; isAdmin: boolean }
+      const decoded = verify(token, process.env.JWT_SECRET!) as DecodedToken
 
       // Get the booking
-      const booking = await db.get('SELECT * FROM bookings WHERE id = ?', [bookingId])
+      const booking = await db.get('SELECT * FROM bookings WHERE id = ?', [bookingId]) as Booking | undefined;
 
       if (!booking) {
         return NextResponse.json(
@@ -331,21 +350,6 @@ export async function DELETE(request: Request) {
         )
       }
 
-      //// Wenn Datum heute ist, prüfe ob die Startzeit bereits vergangen ist
-      //if (bookingDate.getTime() === today.getTime()) {
-      //  const now = new Date()
-      //  const [hours, minutes] = booking.start_time.split(':').map(Number)
-      //  const bookingTime = new Date()
-      //  bookingTime.setHours(hours, minutes, 0, 0)
-//
-      //  if (bookingTime < now) {
-      //    return NextResponse.json(
-      //        { error: 'Vergangene Buchungen können nicht storniert werden' },
-      //        { status: 400 }
-      //    )
-      //  }
-      //}
-
       // Check if user is authorized to delete the booking
       if (!decoded.isAdmin && booking.user_id !== decoded.userId) {
         return NextResponse.json(
@@ -361,8 +365,9 @@ export async function DELETE(request: Request) {
         success: true,
         message: 'Buchung erfolgreich storniert'
       })
-    } catch (err: any) {
-      if (err.name === 'TokenExpiredError') {
+    } catch (err: unknown) {
+      const error = err as Error & { name?: string }
+      if (error.name === 'TokenExpiredError') {
         return NextResponse.json(
             { error: 'Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.' },
             { status: 401 }

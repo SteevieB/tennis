@@ -1,10 +1,10 @@
 // src/lib/db.ts
 import sqlite3 from 'sqlite3'
-import { open } from 'sqlite'
+import { open, Database } from 'sqlite'
 
-let dbConnection: any = null
+let dbConnection: Database | null = null
 
-async function openDb() {
+async function openDb(): Promise<Database> {
   if (!dbConnection) {
     dbConnection = await open({
       filename: './tennis_court_booking.db',
@@ -44,23 +44,26 @@ async function openDb() {
   return dbConnection
 }
 
+// Flexibler Typ für die Parameter
+type SqlParams = Record<string, unknown> | unknown[]
+
 export const db = {
-  async get(sql: string, params: any[] = []) {
+  async get<T = unknown>(sql: string, params: SqlParams = []): Promise<T | undefined> {
     const dbInstance = await openDb()
-    return dbInstance.get(sql, params)
+    return dbInstance.get<T>(sql, params)
   },
 
-  async all(sql: string, params: any[] = []) {
-    const dbInstance = await openDb()
-    return dbInstance.all(sql, params)
-  },
+    async all<T = unknown>(sql: string, params: SqlParams = []): Promise<T[]> {
+        const dbInstance = await openDb()
+        return dbInstance.all<T[]>(sql, params) as Promise<T[]>
+    },
 
-  async run(sql: string, params: any[] = []) {
-    const dbInstance = await openDb()
-    return dbInstance.run(sql, params)
-  },
+    async run(sql: string, params: SqlParams = []): Promise<sqlite3.RunResult> {
+        const dbInstance = await openDb()
+        return dbInstance.run(sql, params) as unknown as sqlite3.RunResult
+    },
 
-  async exec(sql: string) {
+  async exec(sql: string): Promise<void> {
     const dbInstance = await openDb()
     return dbInstance.exec(sql)
   }

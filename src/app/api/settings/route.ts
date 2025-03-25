@@ -19,6 +19,11 @@ const settingsSchema = z.object({
   autoCleanupDays: z.number().min(1).max(365).optional()
 })
 
+interface TokenPayload {
+  userId: number;
+  isAdmin: boolean;
+}
+
 export async function GET() {
   try {
     // Hole die aktuellen Einstellungen
@@ -82,7 +87,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const decoded = verify(token, process.env.JWT_SECRET!) as { userId: number, isAdmin: boolean }
+    const decoded = verify(token, process.env.JWT_SECRET!) as TokenPayload
     if (!decoded.isAdmin) {
       return NextResponse.json(
           { error: 'Nur Administratoren können Einstellungen ändern.' },
@@ -144,7 +149,8 @@ export async function POST(request: Request) {
       message: 'Einstellungen erfolgreich aktualisiert'
     })
   } catch (error) {
-    if ((error as any).name === 'TokenExpiredError') {
+    const tokenError = error as Error & { name?: string };
+    if (tokenError.name === 'TokenExpiredError') {
       return NextResponse.json(
           { error: 'Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.' },
           { status: 401 }

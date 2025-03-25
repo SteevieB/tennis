@@ -6,7 +6,7 @@ export async function POST() {
   try {
     (await cookies()).delete('token')
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
         { error: 'Logout failed' },
         { status: 500 }

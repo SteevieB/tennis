@@ -9,6 +9,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+// Eigener Fehlertyp
+interface ApiError {
+  message: string;
+  [key: string]: unknown;
+}
+
 export default function RegisterPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -59,10 +65,11 @@ export default function RegisterPage() {
         const data = await response.json()
         throw new Error(data.error || 'Registrierung fehlgeschlagen')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
       toast({
         title: "Fehler bei der Registrierung",
-        description: error.message,
+        description: apiError.message || 'Ein unbekannter Fehler ist aufgetreten',
         variant: "destructive"
       })
     } finally {

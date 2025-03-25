@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Home, CircleDot } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
@@ -8,27 +8,7 @@ import BookingSlot from "@/components/BookingSlot"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-
-interface Booking {
-  id: number
-  user_id: number
-  user_name: string
-  start_time: string
-  end_time: string
-  type: 'regular' | 'tournament' | 'maintenance'
-}
-
-interface User {
-  id: number
-  isAdmin: boolean
-}
-
-interface Settings {
-  openingTime: string
-  closingTime: string
-  maintenanceDay: string
-  maintenanceTime: string
-}
+import { Booking, User } from '@/types';
 
 const courts = [
   { id: 1, name: '1' },
@@ -48,7 +28,6 @@ export default function BookingsPage() {
   const [selectedCourt, setSelectedCourt] = useState(courts[0])
   const [bookings, setBookings] = useState<Booking[]>([])
   const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [settings, setSettings] = useState<Settings | null>(null)
   const router = useRouter()
   const { toast } = useToast()
 
@@ -57,27 +36,7 @@ export default function BookingsPage() {
     fetchCurrentUser()
   }, [])
 
-  useEffect(() => {
-    fetchBookings()
-  }, [selectedCourt, selectedDate, currentUser])
-
-  const fetchCurrentUser = async () => {
-    try {
-      const response = await fetch('/api/auth/me')
-      if (response.ok) {
-        const data = await response.json()
-        setCurrentUser(data)
-      } else {
-        // Entferne die console.error-Meldung und setze einfach currentUser auf null
-        setCurrentUser(null)
-      }
-    } catch (error) {
-      // Entferne auch hier die console.error-Meldung
-      setCurrentUser(null)
-    }
-  }
-
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
       // Stelle sicher, dass das Datum im korrekten Format ist
       // Format: YYYY-MM-DD
@@ -96,15 +55,33 @@ export default function BookingsPage() {
         const data = await response.json()
         console.log("Received booking data:", data); // Logging zur Fehlersuche
         setBookings(data.bookings || [])
-        setSettings(data.settings || null)
+        // setSettings(data.settings || null) - auskommentiert, da settings aktuell nicht genutzt wird
       } else {
         setBookings([])
-        setSettings(null)
+        // setSettings(null)
       }
     } catch (error) {
       console.error('Error fetching bookings:', error)
       setBookings([])
-      setSettings(null)
+      // setSettings(null)
+    }
+  }, [selectedCourt, selectedDate, currentUser])
+
+  useEffect(() => {
+    fetchBookings()
+  }, [fetchBookings])
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await fetch('/api/auth/me')
+      if (response.ok) {
+        const data = await response.json()
+        setCurrentUser(data)
+      } else {
+        setCurrentUser(null)
+      }
+    } catch {
+      setCurrentUser(null)
     }
   }
 
@@ -176,9 +153,10 @@ export default function BookingsPage() {
     }
   }
 
-  const canCancelBooking = (booking: Booking) => {
-    return currentUser?.isAdmin || booking.user_id === currentUser?.id
-  }
+  const canCancelBooking = (booking: Booking | null) => {
+    if (!booking) return false;
+    return currentUser?.isAdmin || booking.user_id === currentUser?.id;
+  };
 
   return (
       <div className="space-y-8">

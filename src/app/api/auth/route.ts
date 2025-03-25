@@ -1,16 +1,24 @@
 // /src/app/api/auth/route.ts
 import { NextResponse } from 'next/server'
-// @ts-expect-error
 import { compare } from 'bcrypt'
 import { sign } from 'jsonwebtoken'
 import { cookies } from 'next/headers'
 import { db } from '@/lib/db'
 
+type User = {
+  id: number;
+  email: string;
+  name: string;
+  password_hash: string;
+  is_admin: number;
+  is_active: number;
+}
+
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json()
 
-    const user = await db.get('SELECT * FROM users WHERE email = ?', [email])
+    const user = await db.get('SELECT * FROM users WHERE email = ?', [email]) as User | undefined;
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
