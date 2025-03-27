@@ -11,9 +11,13 @@ export const metadata = {
     title: 'Tennis Unterwössen',
     description: 'Tennisplatz-Buchung',
     icons: {
-        icon: '/icon.png',
-        apple: '/icon.png',
+        icon: [
+            { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+            { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' }
+        ],
+        apple: { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     },
+    manifest: '/site.webmanifest'
 }
 
 function Navigation() {
@@ -23,10 +27,10 @@ function Navigation() {
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center space-x-2">
                         <Image
-                            src="/icon.png"
+                            src="/logo_tvu_1x1.png"
                             alt="Tennis Unterwössen Logo"
-                            width={32}
-                            height={32}
+                            width={48}
+                            height={48}
                             className="rounded-sm"
                         />
                         <Link href="/" className="text-xl font-bold">
