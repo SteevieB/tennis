@@ -1,16 +1,14 @@
 'use client'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Mail, Phone, MapPin } from "lucide-react"
+import { Mail, Phone, MapPin, ExternalLink } from "lucide-react"
 
 export default function KontaktPage() {
   return (
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold">Kontakt</h1>
-          <p className="mt-2 text-muted-foreground">Wir freuen uns über Ihre Nachricht</p>
+          <p className="mt-2 text-muted-foreground">Kontaktieren Sie den Tennisverein Unterwössen</p>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
@@ -44,6 +42,16 @@ export default function KontaktPage() {
                 <div>
                   <h3 className="font-medium">E-Mail</h3>
                   <p className="text-sm text-muted-foreground">tennisverein.unterwoessen@gmx.de</p>
+                  <div className="mt-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.location.href = 'mailto:tennisverein.unterwoessen@gmx.de'}
+                    >
+                      <Mail className="mr-2 h-4 w-4" />
+                      E-Mail schreiben
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -51,37 +59,25 @@ export default function KontaktPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Nachricht senden</CardTitle>
+              <CardTitle>Öffnungszeiten</CardTitle>
             </CardHeader>
-            <CardContent>
-              <form className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input id="name" placeholder="Ihr Name" />
-                </div>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col space-y-2">
+                <h3 className="font-medium">Tennisplätze</h3>
+                <p className="text-sm text-muted-foreground">Täglich von 8:00 - 22:00 Uhr</p>
+                <p className="text-sm text-muted-foreground">Mai bis Oktober (wetterabhängig)</p>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-Mail</Label>
-                  <Input id="email" type="email" placeholder="ihre.email@beispiel.de" />
-                </div>
+              <div className="flex flex-col space-y-2 mt-4">
+                <h3 className="font-medium">Vereinsheim</h3>
+                <p className="text-sm text-muted-foreground">Dienstag und Freitag: 17:00 - 22:00 Uhr</p>
+                <p className="text-sm text-muted-foreground">Wochenende: Bei Spielbetrieb</p>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Betreff</Label>
-                  <Input id="subject" placeholder="Betreff Ihrer Nachricht" />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="message">Nachricht</Label>
-                  <textarea
-                      id="message"
-                      rows={5}
-                      className="w-full min-h-[120px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      placeholder="Ihre Nachricht an uns..."
-                  ></textarea>
-                </div>
-
-                <Button type="submit" className="w-full">Nachricht senden</Button>
-              </form>
+              <div className="flex flex-col space-y-2 mt-4">
+                <h3 className="font-medium">Besonderheiten</h3>
+                <p className="text-sm text-muted-foreground">Jeden Montag von 7:00 - 8:00 Uhr: Platzpflege</p>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -95,7 +91,11 @@ export default function KontaktPage() {
               <div className="text-center p-4">
                 <p className="mb-2">Tennisanlage Unterwössen</p>
                 <p className="text-sm text-muted-foreground mb-4">Streichenweg 18, 83246 Unterwössen</p>
-                <Button variant="outline" onClick={() => window.open('https://maps.google.com/?q=Streichenweg+18+83246+Unterwössen', '_blank')}>
+                <Button
+                    variant="outline"
+                    onClick={() => window.open('https://maps.google.com/?q=Streichenweg+18+83246+Unterwössen', '_blank')}
+                >
+                  <MapPin className="mr-2 h-4 w-4" />
                   In Google Maps öffnen
                 </Button>
               </div>
