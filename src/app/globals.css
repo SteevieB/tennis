@@ -109,9 +109,10 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Verbesserte Typografie */
+  /* Verbesserte Typografie für bessere Lesbarkeit */
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold tracking-tight;
+    text-wrap: balance;
   }
 
   h1 {
@@ -125,21 +126,32 @@
   h3 {
     @apply text-2xl md:text-3xl mb-2;
   }
+
+  /* Verbessertes Paragraph Styling */
+  p {
+    @apply leading-relaxed;
+    text-wrap: pretty;
+  }
 }
 
 @layer utilities {
-  /* Zusätzliche Utility-Klassen */
-  .text-balance {
-    text-wrap: balance;
+  /* Container Queries Utilities */
+  .container-query-sm {
+    container-type: inline-size;
   }
 
-  .text-pretty {
-    text-wrap: pretty;
+  /* Fokus Utilities für bessere Accessibility */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
 
-  /* Sanfte Hover-Transitionen */
-  .hover-transition {
-    @apply transition-all duration-200 ease-in-out;
+  /* Responsive Spacing Utilities */
+  .responsive-p {
+    @apply p-4 md:p-6;
+  }
+
+  .responsive-m {
+    @apply m-4 md:m-6;
   }
 
   /* Glassmorphism-Effekt */
@@ -147,26 +159,43 @@
     @apply bg-background/80 backdrop-blur-sm border;
   }
 
-  /* Link-Unterstriche */
-  .link-underline {
+  /* Link-Unterstriche mit Animation */
+  .link-hover {
     @apply relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5
     after:bg-primary after:scale-x-0 after:origin-right after:transition-transform
     hover:after:scale-x-100 hover:after:origin-left;
+  }
+
+  /* Abgeflachte Ecken für Buttons in mobilen Ansichten */
+  @media (max-width: 640px) {
+    .mobile-flat {
+      @apply rounded-none;
+    }
   }
 }
 
 /* Verbesserte Scrollbar */
 @media (min-width: 768px) {
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-secondary;
+    @apply bg-secondary/50 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-primary/50 rounded-full hover:bg-primary/70 transition-colors;
+    @apply bg-primary/40 rounded-full hover:bg-primary/60 transition-colors;
+  }
+}
+
+/* Reduced-Motion Preference Support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
