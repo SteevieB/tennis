@@ -1,7 +1,7 @@
 'use client'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Mail, Phone, MapPin, ExternalLink } from "lucide-react"
+import { Mail, Phone, MapPin } from "lucide-react"
 
 export default function KontaktPage() {
   return (
