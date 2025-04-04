@@ -131,12 +131,12 @@ export default function AdminSettingsPage() {
   }
 
   return (
-      <div className="space-y-6">
+      <div className="space-y-6 pb-16 md:pb-0">
         <h1 className="text-3xl font-bold">Admin-Einstellungen</h1>
 
         <Tabs defaultValue="general">
-          <div className="flex justify-between items-center mb-4">
-            <TabsList>
+          <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
+            <TabsList className="mb-2">
               <TabsTrigger value="general">Allgemeine Einstellungen</TabsTrigger>
               <TabsTrigger value="blocks">Platzsperrungen</TabsTrigger>
             </TabsList>
@@ -152,7 +152,7 @@ export default function AdminSettingsPage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="maxBookingDuration">Maximale Buchungsdauer (Minuten)</Label>
                       <Input
@@ -259,7 +259,7 @@ export default function AdminSettingsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Platz</Label>
                         <Select
@@ -287,7 +287,7 @@ export default function AdminSettingsPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Von</Label>
                         <Calendar

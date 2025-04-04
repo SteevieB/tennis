@@ -1,17 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import {
   AlertDialog,
@@ -38,6 +31,7 @@ export default function AdminUsersPage() {
   const [userToActivate, setUserToActivate] = useState<User | null>(null)
   const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null)
   const { toast } = useToast()
+  const router = useRouter()
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -106,8 +100,16 @@ export default function AdminUsersPage() {
   }
 
   return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Benutzerverwaltung</h1>
+      <div className="space-y-6 pb-16 md:pb-0">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h1 className="text-3xl font-bold">Benutzerverwaltung</h1>
+          <Button
+              variant="outline"
+              onClick={() => router.push('/admin/settings')}
+          >
+            Zurück zu Einstellungen
+          </Button>
+        </div>
 
         <Card>
           <CardHeader>
@@ -117,22 +119,20 @@ export default function AdminUsersPage() {
             {loading ? (
                 <div className="text-center py-4">Laden...</div>
             ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>E-Mail</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Rolle</TableHead>
-                      <TableHead>Aktionen</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">{user.name}</TableCell>
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell>
+                <div className="space-y-4">
+                  {users.map((user) => (
+                      <div key={user.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg gap-3">
+                        <div className="grid gap-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{user.name}</span>
+                            {user.is_admin ? (
+                                <Badge className="bg-blue-500">Admin</Badge>
+                            ) : null}
+                          </div>
+                          <div className="text-sm text-muted-foreground truncate max-w-[250px]">
+                            {user.email}
+                          </div>
+                          <div className="mt-1">
                             {user.is_active ? (
                                 <Badge className="bg-green-500">Aktiv</Badge>
                             ) : (
@@ -140,45 +140,36 @@ export default function AdminUsersPage() {
                                   Warten auf Freischaltung
                                 </Badge>
                             )}
-                          </TableCell>
-                          <TableCell>
-                            {user.is_admin ? (
-                                <Badge className="bg-blue-500">Administrator</Badge>
-                            ) : (
-                                <Badge variant="outline">Mitglied</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {user.is_active ? (
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => setUserToDeactivate(user)}
-                                >
-                                  Deaktivieren
-                                </Button>
-                            ) : (
-                                <Button
-                                    className="bg-green-500 hover:bg-green-600"
-                                    size="sm"
-                                    onClick={() => setUserToActivate(user)}
-                                >
-                                  Freischalten
-                                </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                    ))}
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          {user.is_active ? (
+                              <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => setUserToDeactivate(user)}
+                              >
+                                Deaktivieren
+                              </Button>
+                          ) : (
+                              <Button
+                                  className="bg-green-500 hover:bg-green-600"
+                                  size="sm"
+                                  onClick={() => setUserToActivate(user)}
+                              >
+                                Freischalten
+                              </Button>
+                          )}
+                        </div>
+                      </div>
+                  ))}
 
-                    {users.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center">
-                            Keine Benutzer gefunden.
-                          </TableCell>
-                        </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                  {users.length === 0 && (
+                      <div className="text-center p-4 border rounded-lg">
+                        Keine Benutzer gefunden.
+                      </div>
+                  )}
+                </div>
             )}
           </CardContent>
         </Card>

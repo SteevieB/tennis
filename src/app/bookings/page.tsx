@@ -160,7 +160,7 @@ export default function BookingsPage() {
 
   return (
       <div className="space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <h1 className="text-3xl font-bold">Tennisplatzbuchung</h1>
           {currentUser?.isAdmin ? (
               <Button variant="outline" onClick={() => router.push('/admin/settings')}>
