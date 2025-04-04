@@ -71,7 +71,7 @@ export function AuthButton() {
     return (
         <button
             onClick={isLoggedIn ? handleLogout : handleLoginClick}
-            className="absolute top-4 right-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            className="hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
             {isLoggedIn ? 'Logout' : 'Login'}
         </button>

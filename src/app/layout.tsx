@@ -67,7 +67,7 @@ function Navigation() {
 
 function MobileNavigation() {
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-primary text-primary-foreground shadow-lg">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-primary text-primary-foreground shadow-lg z-10">
             <div className="flex justify-around py-3">
                 <Link
                     href="/bookings"
@@ -86,6 +86,12 @@ function MobileNavigation() {
                     className="flex flex-col items-center space-y-1"
                 >
                     <span className="text-sm">Kontakt</span>
+                </Link>
+                <Link
+                    href="/auth"
+                    className="flex flex-col items-center space-y-1"
+                >
+                    <span className="text-sm">Login</span>
                 </Link>
             </div>
         </div>
@@ -119,7 +125,7 @@ function Footer() {
 
                 <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
                     <p className="mb-2">© {new Date().getFullYear()} Tennis Unterwössen</p>
-                    <div className="space-x-4">
+                    <div className="space-x-4 md:pb-0 pb-16">
                         <Link href="/datenschutz" className="hover:text-primary">Datenschutz</Link>
                         <Link href="/impressum" className="hover:text-primary">Impressum</Link>
                     </div>
