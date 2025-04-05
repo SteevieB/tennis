@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
     poweredByHeader: false,
     compress: true,
 
-    // Diese Option wurde verschoben
     outputFileTracingExcludes: {
         '*': [
             'node_modules/@swc/core-linux-x64-gnu',

@@ -38,9 +38,7 @@ export default function BookingsPage() {
 
   const fetchBookings = useCallback(async () => {
     try {
-      // Stelle sicher, dass das Datum im korrekten Format ist
-      // Format: YYYY-MM-DD
-      const formattedDate = selectedDate.toISOString().split('T')[0]
+      const formattedDate = selectedDate.toLocaleDateString('en-CA');
       console.log("Fetching bookings for date:", formattedDate); // Logging zur Fehlersuche
 
       const endpoint = currentUser
@@ -87,7 +85,7 @@ export default function BookingsPage() {
 
   const handleBooking = async (startTime: string, type: string = 'regular') => {
     try {
-      const formattedDate = selectedDate.toISOString().split('T')[0]
+      const formattedDate = selectedDate.toLocaleDateString('en-CA'); // Gibt YYYY-MM-DD zurück
       const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
