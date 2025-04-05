@@ -231,15 +231,34 @@ export async function POST(request: Request) {
 
       // Prüfe, ob das Datum in der Vergangenheit liegt
       const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const bookingDate = new Date(date)
-      bookingDate.setHours(0, 0, 0, 0)
+      const todayDate = today.toLocaleDateString('en-CA')
+      const todayTime = today.toLocaleTimeString('en-US', { hour12: false, hour: "numeric", minute: "numeric"});
+      const bookingDate = new Date(date).toLocaleDateString('en-CA')
 
-      if (bookingDate < today) {
+      if (bookingDate < todayDate) {
         return NextResponse.json(
             { error: 'Buchungen in der Vergangenheit sind nicht möglich' },
             { status: 400 }
         )
+      }
+
+      // Wenn die Buchung für heute ist, prüfe, ob die Startzeit mindestens eine Stunde in der Zukunft liegt
+      if (bookingDate === todayDate) {
+        // Aktuelle Zeit in Minuten seit Mitternacht
+        const [currentHour, currentMinute] = todayTime.split(':').map(Number);
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+        // Startzeit der Buchung in Minuten seit Mitternacht
+        const [bookingHour, bookingMinute] = startTime.split(':').map(Number);
+        const bookingTimeInMinutes = bookingHour * 60 + bookingMinute;
+
+        // Prüfen, ob die Buchung mindestens 60 Minuten in der Zukunft liegt
+        if (bookingTimeInMinutes < currentTimeInMinutes + 60) {
+          return NextResponse.json(
+              { error: 'Buchungen für heute müssen mindestens eine Stunde in der Zukunft liegen' },
+              { status: 400 }
+          )
+        }
       }
 
       const [hours, minutes] = startTime.split(':')
