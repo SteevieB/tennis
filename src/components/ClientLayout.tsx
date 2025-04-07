@@ -7,6 +7,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { CLUB_INFO } from "@/lib/constants";
 
 function Navigation() {
     return (
@@ -22,7 +23,7 @@ function Navigation() {
                             className="rounded-sm"
                         />
                         <Link href="/" className="text-xl font-bold">
-                            Tennisverein Unterwössen e.V.
+                            {CLUB_INFO.name}
                         </Link>
                     </div>
 
@@ -158,25 +159,25 @@ function Footer() {
             <div className="max-w-3xl mx-auto px-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                        <h3 className="text-lg font-semibold">Tennisverein Unterwössen e.V.</h3>
+                        <h3 className="text-lg font-semibold">{CLUB_INFO.name}</h3>
                         <div className="mt-4 space-y-2 text-sm text-muted-foreground">
-                            <p>Streichenweg 18</p>
-                            <p>83246 Unterwössen</p>
-                            <p>Tel: +49 (0)174 396 47 45</p>
-                            <p>Email: info@tennis-unterwoessen.de</p>
+                            <p>{CLUB_INFO.address.street}</p>
+                            <p>{CLUB_INFO.address.zip} {CLUB_INFO.address.city}</p>
+                            <p>Tel: {CLUB_INFO.contact.phone}</p>
+                            <p>Email: {CLUB_INFO.contact.email}</p>
                         </div>
                     </div>
 
                     <div>
                         <h3 className="text-lg font-semibold mb-4">Öffnungszeiten</h3>
                         <div className="space-y-2 text-sm text-muted-foreground">
-                            <p>Täglich von 7:00 - 23:00 Uhr</p>
+                            <p>Täglich von {CLUB_INFO.court.openingHours.open} - {CLUB_INFO.court.openingHours.close} Uhr</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-                    <p className="mb-2">© {new Date().getFullYear()} Tennisverein Unterwössen e.V. <br/> Webdesign: Stefan Brandl</p>
+                    <p className="mb-2">© {new Date().getFullYear()} {CLUB_INFO.name} <br/> Webdesign: Stefan Brandl</p>
                     <div className="space-x-4 md:pb-0 pb-16">
                         <Link href="/datenschutz" className="hover:text-primary">Datenschutz</Link>
                         <Link href="/impressum" className="hover:text-primary">Impressum</Link>

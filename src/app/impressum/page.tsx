@@ -1,3 +1,5 @@
+import { CLUB_INFO } from "@/lib/constants";
+
 export default function ImpressumPage() {
   return (
       <div className="space-y-8">
@@ -10,31 +12,31 @@ export default function ImpressumPage() {
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-3">Angaben zum Verein</h2>
             <p className="mb-4">
-              Tennisverein Unterwössen e.V.<br />
-              Streichenweg 18<br />
-              83246 Unterwössen
+              {CLUB_INFO.name}<br />
+              {CLUB_INFO.address.street}<br />
+              {CLUB_INFO.address.zip} {CLUB_INFO.address.city}
             </p>
 
             <p className="mb-4">
               <strong>Vereinsregistereintrag:</strong><br />
-              Eingetragen im Vereinsregister beim Amtsgericht Traunstein<br />
-              Registernummer: VR 202188
+              Eingetragen im Vereinsregister beim {CLUB_INFO.legalInfo.register}<br />
+              Registernummer: {CLUB_INFO.legalInfo.registerNumber}
             </p>
 
             <p className="mb-4">
               <strong>Vertreten durch:</strong><br />
-              1. Vorsitzender: Martin Bichler<br />
-              2. Vorsitzender: Martin Eisenberger<br />
-              Schatzmeister: Bernhard Eisenberger<br />
-              Jugendbeauftragte: Inge Beck<br />
-              Schriftführer: Till Kürschner
+              1. Vorsitzender: {CLUB_INFO.management.chairman}<br />
+              2. Vorsitzender: {CLUB_INFO.management.vicechairman}<br />
+              Schatzmeister: {CLUB_INFO.management.treasurer}<br />
+              Jugendbeauftragte: {CLUB_INFO.management.youth}<br />
+              Schriftführer: {CLUB_INFO.management.schreiber}
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-3">Kontakt</h2>
             <p className="mb-4">
-              Telefon: +49 (0)174 396 47 45<br />
+              Telefon: +49 (0)174 396 4745<br />
               E-Mail: info@tennis-unterwoessen.de
             </p>
           </section>
@@ -42,10 +44,10 @@ export default function ImpressumPage() {
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-3">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
             <p className="mb-4">
-              Martin Bichler<br />
+              {CLUB_INFO.management.chairman}<br />
               1. Vorstand<br />
-              Kirchackerweg 33<br />
-              83246 Unterwössen
+              {CLUB_INFO.managementAddress.street}<br />
+              {CLUB_INFO.managementAddress.zip} {CLUB_INFO.managementAddress.city}
             </p>
           </section>
 

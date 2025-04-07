@@ -1,3 +1,5 @@
+import { CLUB_INFO } from "@/lib/constants";
+
 export default function DatenschutzPage() {
   return (
       <div className="space-y-8">
@@ -11,11 +13,11 @@ export default function DatenschutzPage() {
             <h2 className="text-xl font-semibold mt-6 mb-3">1. Verantwortlicher</h2>
             <p>Verantwortlich für die Datenverarbeitung auf dieser Website ist:</p>
             <p className="mb-4">
-              Tennisverein Unterwössen e.V.<br />
-              Streichenweg 18<br />
-              83246 Unterwössen<br />
-              E-Mail: info@tennis-unterwoessen.de<br />
-              Telefon: +49 (0)160 97077622
+              {CLUB_INFO.name}<br />
+              {CLUB_INFO.address.street}<br />
+              {CLUB_INFO.address.zip} {CLUB_INFO.address.city}<br />
+              E-Mail: {CLUB_INFO.contact.email}<br />
+              Telefon: {CLUB_INFO.contact.phone}
             </p>
           </section>
 
