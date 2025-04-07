@@ -10,16 +10,43 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Booking, User } from '@/types';
 
+interface Settings {
+  openingTime?: string;
+  closingTime?: string;
+  maintenanceDay?: string;
+  maintenanceTime?: string;
+}
+
 const courts = [
   { id: 1, name: '1' },
   { id: 2, name: '2' },
   { id: 3, name: '3' },
 ]
 
-const timeSlots = Array.from({ length: 14 }, (_, i) => {
-  const hour = i + 8
-  return `${hour.toString().padStart(2, '0')}:00`
-})
+// Funktion zum Generieren von Timeslots basierend auf Öffnungs- und Schließzeiten
+function generateTimeSlots(settings: Settings | null) {
+  // Standardwerte, falls keine Einstellungen vorhanden sind
+  const defaultOpeningHour = 7;
+  const defaultClosingHour = 22;
+
+  // Parse die Zeiten aus den Strings
+  let openingHour = defaultOpeningHour;
+  let closingHour = defaultClosingHour;
+
+  if (settings?.openingTime && settings?.closingTime) {
+    openingHour = parseInt(settings.openingTime.split(':')[0]);
+    closingHour = parseInt(settings.closingTime.split(':')[0]);
+  }
+
+  // Berechne die Anzahl der Stunden zwischen Öffnungszeit und Schließzeit
+  const length = closingHour - openingHour;
+
+  // Generiere die Timeslots
+  return Array.from({ length }, (_, i) => {
+    const hour = i + openingHour;
+    return `${hour.toString().padStart(2, '0')}:00`;
+  });
+}
 
 export default function BookingsPage() {
   const today = new Date()
@@ -27,10 +54,13 @@ export default function BookingsPage() {
   const [selectedDate, setSelectedDate] = useState(today)
   const [selectedCourt, setSelectedCourt] = useState(courts[0])
   const [bookings, setBookings] = useState<Booking[]>([])
+  const [settings, setSettings] = useState<Settings | null>(null)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const router = useRouter()
   const { toast } = useToast()
 
+  // Generiere Timeslots basierend auf den Einstellungen
+  const timeSlots = generateTimeSlots(settings);
 
   useEffect(() => {
     fetchCurrentUser()
@@ -39,29 +69,25 @@ export default function BookingsPage() {
   const fetchBookings = useCallback(async () => {
     try {
       const formattedDate = selectedDate.toLocaleDateString('en-CA');
-      console.log("Fetching bookings for date:", formattedDate); // Logging zur Fehlersuche
 
       const endpoint = currentUser
           ? `/api/bookings?courtId=${selectedCourt.id}&date=${formattedDate}`
           : `/api/public/bookings?courtId=${selectedCourt.id}&date=${formattedDate}`
 
-      console.log("API endpoint:", endpoint); // Logging zur Fehlersuche
-
       const response = await fetch(endpoint)
 
       if (response.ok) {
         const data = await response.json()
-        console.log("Received booking data:", data); // Logging zur Fehlersuche
         setBookings(data.bookings || [])
-        // setSettings(data.settings || null) - auskommentiert, da settings aktuell nicht genutzt wird
+        setSettings(data.settings || null)
       } else {
         setBookings([])
-        // setSettings(null)
+        setSettings(null)
       }
     } catch (error) {
       console.error('Error fetching bookings:', error)
       setBookings([])
-      // setSettings(null)
+      setSettings(null)
     }
   }, [selectedCourt, selectedDate, currentUser])
 
@@ -85,7 +111,7 @@ export default function BookingsPage() {
 
   const handleBooking = async (startTime: string, type: string = 'regular') => {
     try {
-      const formattedDate = selectedDate.toLocaleDateString('en-CA'); // Gibt YYYY-MM-DD zurück
+      const formattedDate = selectedDate.toLocaleDateString('en-CA');
       const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
