@@ -11,7 +11,7 @@ export default function DatenschutzPage() {
             <h2 className="text-xl font-semibold mt-6 mb-3">1. Verantwortlicher</h2>
             <p>Verantwortlich für die Datenverarbeitung auf dieser Website ist:</p>
             <p className="mb-4">
-              Tennis Unterwössen e.V.<br />
+              Tennisverein Unterwössen e.V.<br />
               Streichenweg 18<br />
               83246 Unterwössen<br />
               E-Mail: info@tennis-unterwoessen.de<br />
