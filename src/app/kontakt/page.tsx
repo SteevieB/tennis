@@ -31,9 +31,7 @@ export default function KontaktPage() {
                 <Phone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-medium">Telefon</h3>
-                  <p className="text-sm text-muted-foreground">+49 (0)160 97077622</p>
-                  <p className="text-sm text-muted-foreground mt-2">Platzwart Hans Müller:</p>
-                  <p className="text-sm text-muted-foreground">Tel: 0123 / 456789</p>
+                  <p className="text-sm text-muted-foreground">+49 (0)174 396 47 45</p>
                 </div>
               </div>
 
