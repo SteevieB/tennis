@@ -21,7 +21,7 @@ export default function KontaktPage() {
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-medium">Adresse</h3>
-                  <p className="text-sm text-muted-foreground">Tennis Unterwössen e.V.</p>
+                  <p className="text-sm text-muted-foreground">Tennisverein Unterwössen e.V.</p>
                   <p className="text-sm text-muted-foreground">Streichenweg 18</p>
                   <p className="text-sm text-muted-foreground">83246 Unterwössen</p>
                 </div>
@@ -41,12 +41,12 @@ export default function KontaktPage() {
                 <Mail className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-medium">E-Mail</h3>
-                  <p className="text-sm text-muted-foreground">tennisverein.unterwoessen@gmx.de</p>
+                  <p className="text-sm text-muted-foreground">info@tennis-unterwoessen.de</p>
                   <div className="mt-2">
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.location.href = 'mailto:tennisverein.unterwoessen@gmx.de'}
+                        onClick={() => window.location.href = 'mailto:info@tennis-unterwoessen.de'}
                     >
                       <Mail className="mr-2 h-4 w-4" />
                       E-Mail schreiben
@@ -64,19 +64,16 @@ export default function KontaktPage() {
             <CardContent className="space-y-4">
               <div className="flex flex-col space-y-2">
                 <h3 className="font-medium">Tennisplätze</h3>
-                <p className="text-sm text-muted-foreground">Täglich von 8:00 - 22:00 Uhr</p>
+                <p className="text-sm text-muted-foreground">Täglich von 7:00 - 23:00 Uhr</p>
                 <p className="text-sm text-muted-foreground">Mai bis Oktober (wetterabhängig)</p>
               </div>
 
               <div className="flex flex-col space-y-2 mt-4">
-                <h3 className="font-medium">Vereinsheim</h3>
-                <p className="text-sm text-muted-foreground">Dienstag und Freitag: 17:00 - 22:00 Uhr</p>
-                <p className="text-sm text-muted-foreground">Wochenende: Bei Spielbetrieb</p>
-              </div>
-
-              <div className="flex flex-col space-y-2 mt-4">
-                <h3 className="font-medium">Besonderheiten</h3>
-                <p className="text-sm text-muted-foreground">Jeden Montag von 7:00 - 8:00 Uhr: Platzpflege</p>
+                <h3 className="font-medium">Tennisheim</h3>
+                <p className="text-sm text-muted-foreground">
+                  Das Tennisheim (Umkleiden/Toiletten) hat aktuell keine geregelten Öffnungszeiten,<br />
+                  wir versuchen jedoch so oft wie möglich vor Ort zu sein
+                </p>
               </div>
             </CardContent>
           </Card>

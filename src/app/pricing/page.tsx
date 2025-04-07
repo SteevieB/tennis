@@ -17,7 +17,7 @@ export default function PricingPage() {
             <CardContent>
               <div className="flex justify-between items-center py-2 border-b">
                 <span>Tennisplatz pro Stunde</span>
-                <span className="font-medium">10 €</span>
+                <span className="font-medium">12 €</span>
               </div>
             </CardContent>
           </Card>
@@ -29,45 +29,32 @@ export default function PricingPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex justify-between items-center py-2 border-b">
-                <span>Kinder unter 12 Jahre</span>
-                <span className="font-medium">0 €</span>
+                <span>Einzelmitglieder</span>
+                <span className="font-medium">100 €</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b">
-                <span>Jugendliche 12 - 15 Jahre</span>
+                <span>Ehepaare</span>
+                <span className="font-medium">190 €</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b">
+                <span>Kinder bis 14 Jahre</span>
+                <span className="font-medium">25 €</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b">
+                <span>Jugendliche bis 18 Jahre</span>
                 <span className="font-medium">50 €</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b">
-                <span>Jugendliche 16 - 18 Jahre</span>
-                <span className="font-medium">75 €</span>
+                <span>Studenten / Zivildienstleistende</span>
+                <span className="font-medium">50 €</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b">
-                <span>Erwachsene (ab 18 Jahre)</span>
-                <span className="font-medium">100 €</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Saisonkarte */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Saisonkarte</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between items-center py-2 border-b">
-                <span>Kinder unter 12 Jahre</span>
-                <span className="font-medium">10 €</span>
+                <span>Passive Mitglieder</span>
+                <span className="font-medium">25 €</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b">
-                <span>Jugendliche 12 - 15 Jahre</span>
-                <span className="font-medium">60 €</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b">
-                <span>Jugendliche 16 - 18 Jahre</span>
-                <span className="font-medium">85 €</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b">
-                <span>Erwachsene (ab 18 Jahre)</span>
-                <span className="font-medium">110 €</span>
+                <span>Familienbeitrag</span>
+                <span className="font-small">auf Anfrage</span>
               </div>
             </CardContent>
           </Card>

@@ -1,3 +1,4 @@
+// src/components/ClientLayout.tsx
 'use client'
 
 import { Toaster } from "@/components/ui/toaster"
@@ -10,7 +11,7 @@ import { useRouter } from 'next/navigation'
 function Navigation() {
     return (
         <nav className="bg-primary text-primary-foreground shadow-lg">
-            <div className="max-w-3xl mx-auto px-4">
+            <div className="max-w-4xl mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center space-x-2">
                         <Image
@@ -157,27 +158,25 @@ function Footer() {
             <div className="max-w-3xl mx-auto px-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                        <h3 className="text-lg font-semibold">Tennis Unterwössen</h3>
+                        <h3 className="text-lg font-semibold">Tennisverein Unterwössen e.V.</h3>
                         <div className="mt-4 space-y-2 text-sm text-muted-foreground">
                             <p>Streichenweg 18</p>
                             <p>83246 Unterwössen</p>
-                            <p>Tel: +49 (0)160 97077622</p>
-                            <p>Email: tennisverein.unterwoessen@gmx.de</p>
+                            <p>Tel: +49 (0)174 396 47 45</p>
+                            <p>Email: info@tennis-unterwoessen.de</p>
                         </div>
                     </div>
 
                     <div>
                         <h3 className="text-lg font-semibold mb-4">Öffnungszeiten</h3>
                         <div className="space-y-2 text-sm text-muted-foreground">
-                            <p>Täglich von 8:00 - 22:00 Uhr</p>
-                            <p>Platzwart: Hans Müller</p>
-                            <p>Tel: 0123 / 456789</p>
+                            <p>Täglich von 7:00 - 23:00 Uhr</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-                    <p className="mb-2">© {new Date().getFullYear()} Tennis Unterwössen</p>
+                    <p className="mb-2">© {new Date().getFullYear()} Tennisverein Unterwössen e.V. <br/> Webdesign: Stefan Brandl</p>
                     <div className="space-x-4 md:pb-0 pb-16">
                         <Link href="/datenschutz" className="hover:text-primary">Datenschutz</Link>
                         <Link href="/impressum" className="hover:text-primary">Impressum</Link>

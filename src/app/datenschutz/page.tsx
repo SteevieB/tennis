@@ -14,7 +14,7 @@ export default function DatenschutzPage() {
               Tennis Unterwössen e.V.<br />
               Streichenweg 18<br />
               83246 Unterwössen<br />
-              E-Mail: tennisverein.unterwoessen@gmx.de<br />
+              E-Mail: info@tennis-unterwoessen.de<br />
               Telefon: +49 (0)160 97077622
             </p>
           </section>
@@ -32,7 +32,6 @@ export default function DatenschutzPage() {
             <ul className="list-disc pl-6 mb-4">
               <li>Login-Informationen (JWT-Token)</li>
               <li>Spracheinstellungen</li>
-              <li>Artikel in einem Warenkorb</li>
             </ul>
           </section>
 

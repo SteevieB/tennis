@@ -18,38 +18,33 @@ export default function ImpressumPage() {
             <p className="mb-4">
               <strong>Vereinsregistereintrag:</strong><br />
               Eingetragen im Vereinsregister beim Amtsgericht Traunstein<br />
-              Registernummer: VR 12345
+              Registernummer: VR 202188
             </p>
 
             <p className="mb-4">
               <strong>Vertreten durch:</strong><br />
-              1. Vorsitzender: Max Mustermann<br />
-              2. Vorsitzender: Erika Musterfrau<br />
-              Kassenwart: Hans Beispiel
+              1. Vorsitzender: Martin Bichler<br />
+              2. Vorsitzender: Martin Eisenberger<br />
+              Schatzmeister: Bernhard Eisenberger<br />
+              Jugendbeauftragte: Inge Beck<br />
+              Schriftführer: Till Kürschner
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-3">Kontakt</h2>
             <p className="mb-4">
-              Telefon: +49 (0)160 97077622<br />
-              E-Mail: tennisverein.unterwoessen@gmx.de
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold mt-6 mb-3">Umsatzsteuer-ID</h2>
-            <p className="mb-4">
-              Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br />
-              DE 123456789
+              Telefon: +49 (0)174 396 47 45<br />
+              E-Mail: info@tennis-unterwoessen.de
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-3">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
             <p className="mb-4">
-              Max Mustermann<br />
-              Streichenweg 18<br />
+              Martin Bichler<br />
+              1. Vorstand<br />
+              Kirchackerweg 33<br />
               83246 Unterwössen
             </p>
           </section>

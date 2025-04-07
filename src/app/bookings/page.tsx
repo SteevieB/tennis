@@ -26,7 +26,7 @@ const courts = [
 // Funktion zum Generieren von Timeslots basierend auf Öffnungs- und Schließzeiten
 function generateTimeSlots(settings: Settings | null) {
   // Standardwerte, falls keine Einstellungen vorhanden sind
-  const defaultOpeningHour = 7;
+  const defaultOpeningHour = 8;
   const defaultClosingHour = 22;
 
   // Parse die Zeiten aus den Strings
@@ -245,6 +245,9 @@ export default function BookingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Verfügbare Zeiten</CardTitle>
+            <p className="p-1 text-sm text-gray-500 mx-auto">
+              Platz 1 ist nur nach Rücksprache mit Schlüssel, die Plätze 2 und 3 sind durchgehend zugänglich
+            </p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">

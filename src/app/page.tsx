@@ -7,12 +7,12 @@ export default function HomePage() {
     return (
         <div className="space-y-8">
             {/* Hauptbereich */}
-            <section className="space-y-4">
+            <section className="space-y-4 px-2 text-center">
                 <h1 className="text-3xl font-bold text-center">
                     Tennis in Unterwössen
                 </h1>
                 <p className="text-muted-foreground">
-                    Herzlich willkommen auf der Buchungsseite unseres Tennisvereins.
+                    Herzlich willkommen auf der Website des Tennisverein Unterwössen e.V.<br/>
                     Hier können Sie ganz einfach einen unserer drei Plätze reservieren.
                 </p>
                 <p className="text-muted-foreground">
@@ -27,33 +27,15 @@ export default function HomePage() {
 
             {/* Aktuelle Infos */}
             <Card className="p-6 bg-muted/50">
-                <h2 className="font-semibold mb-3">Aktuelle Hinweise</h2>
-                <ul className="space-y-2 text-sm">
-                    <li>• Platzpflege jeden Montag von 7-8 Uhr</li>
+                <h2 className="font-semibold mb-4">Aktuelle Hinweise</h2>
+                <ul className="space-y-4 px-2 text-sm">
+                    <li>• Platz 1 ist nur nach Rücksprache mit Schlüssel, die Plätze 2 und 3 sind durchgehend zugänglich <br/> (bitte bei Reservierung beachten)</li>
                     <li>• Buchungen sind bis zu 7 Tage im Voraus möglich</li>
-                    <li>• Bei Fragen: Hans Müller (Platzwart) - Tel: 0123/456789</li>
+                    <li>• Zutritt zu den Plätzen nur mit geeignetem Schuhwerk (Tennisschuhe)</li>
+                    <li>• Die gesamte Anlage ist pfleglich zu behandeln, Schäden sind umgehend zu melden</li>
+                    <li>• Das Tennisheim (Umkleiden/Toiletten) hat aktuell keine geregelten Öffnungszeiten, <br/>  wir versuchen jedoch so oft wie möglich vor Ort zu sein</li>
                 </ul>
             </Card>
-
-            {/* Öffnungszeiten und Kontakt */}
-            <div className="grid gap-6 sm:grid-cols-2">
-                <div>
-                    <h2 className="font-semibold mb-3">Öffnungszeiten</h2>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                        <p>Montag - Sonntag</p>
-                        <p>8:00 - 22:00 Uhr</p>
-                    </div>
-                </div>
-
-                <div>
-                    <h2 className="font-semibold mb-3">So finden Sie uns</h2>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                        <p>Mitterweg 7</p>
-                        <p>83246 Unterwössen</p>
-                        <p className="mt-4">Parkplätze direkt an der Anlage</p>
-                    </div>
-                </div>
-            </div>
 
             {/* Platzbild */}
             <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden">
