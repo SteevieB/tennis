@@ -27,7 +27,7 @@ export const CLUB_INFO = {
         count: 3,
         openingHours: {
             open: "07:00",
-            close: "23:00",
+            close: "22:00",
         },
         addition: "Mai bis Oktober (wetterabhängig)"
     },

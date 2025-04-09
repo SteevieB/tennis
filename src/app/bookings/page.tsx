@@ -19,8 +19,8 @@ interface Settings {
 
 const courts = [
   { id: 1, name: '1' },
-  { id: 2, name: '2' },
-  { id: 3, name: '3' },
+  { id: 2, name: '3' }, // Nummerierung so im Pachtvertrag
+  { id: 3, name: '2' },
 ]
 
 // Funktion zum Generieren von Timeslots basierend auf Öffnungs- und Schließzeiten
