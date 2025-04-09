@@ -177,7 +177,15 @@ function Footer() {
                 </div>
 
                 <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-                    <p className="mb-2">© {new Date().getFullYear()} {CLUB_INFO.name} <br/> Webdesign: Stefan Brandl</p>
+                    <p className="mb-2">© {new Date().getFullYear()} {CLUB_INFO.name}</p>
+
+                    {/* Credits Badge */}
+                    <div className="mb-4 opacity-70 hover:opacity-100 transition-opacity">
+                        <p className="text-xs text-muted-foreground">
+                            Design: Stefan Brandl · Hosting: Rechenzentrum Neuschmied
+                        </p>
+                    </div>
+
                     <div className="space-x-4 md:pb-0 pb-16">
                         <Link href="/datenschutz" className="hover:text-primary">Datenschutz</Link>
                         <Link href="/impressum" className="hover:text-primary">Impressum</Link>
