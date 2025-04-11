@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,9 +29,12 @@ interface User {
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [userToActivate, setUserToActivate] = useState<User | null>(null)
   const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [activeFilter, setActiveFilter] = useState('all')
   const { toast } = useToast()
   const router = useRouter()
 
@@ -40,6 +45,7 @@ export default function AdminUsersPage() {
       if (response.ok) {
         const data = await response.json()
         setUsers(data)
+        setFilteredUsers(data)
       } else {
         toast({
           title: "Fehler beim Laden der Benutzer",
@@ -62,6 +68,37 @@ export default function AdminUsersPage() {
   useEffect(() => {
     fetchUsers()
   }, [fetchUsers])
+
+  // Filtere Benutzer basierend auf Suchbegriff und aktivem Filter
+  useEffect(() => {
+    let result = users
+
+    // Filtere nach Suchbegriff
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      result = result.filter(user =>
+          user.name.toLowerCase().includes(term) ||
+          user.email.toLowerCase().includes(term)
+      )
+    }
+
+    // Wende den Statusfilter an
+    if (activeFilter !== 'all') {
+      switch (activeFilter) {
+        case 'admin':
+          result = result.filter(user => user.is_admin)
+          break
+        case 'active':
+          result = result.filter(user => user.is_active && !user.is_admin)
+          break
+        case 'pending':
+          result = result.filter(user => !user.is_active)
+          break
+      }
+    }
+
+    setFilteredUsers(result)
+  }, [users, searchTerm, activeFilter])
 
   const handleToggleUserStatus = async (user: User, activate: boolean) => {
     try {
@@ -99,6 +136,18 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value)
+  }
+
+  const handleFilterChange = (value: string) => {
+    setActiveFilter(value)
+  }
+
+  const clearSearch = () => {
+    setSearchTerm('')
+  }
+
   return (
       <div className="space-y-6 pb-16 md:pb-0">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -116,61 +165,93 @@ export default function AdminUsersPage() {
             <CardTitle>Benutzer</CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? (
-                <div className="text-center py-4">Laden...</div>
-            ) : (
-                <div className="space-y-4">
-                  {users.map((user) => (
-                      <div key={user.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg gap-3">
-                        <div className="grid gap-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{user.name}</span>
-                            {user.is_admin ? (
-                                <Badge className="bg-blue-500">Admin</Badge>
-                            ) : null}
-                          </div>
-                          <div className="text-sm text-muted-foreground truncate max-w-[250px]">
-                            {user.email}
-                          </div>
-                          <div className="mt-1">
-                            {user.is_active ? (
-                                <Badge className="bg-green-500">Aktiv</Badge>
-                            ) : (
-                                <Badge variant="outline" className="text-orange-500 border-orange-500">
-                                  Warten auf Freischaltung
-                                </Badge>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex justify-end">
-                          {user.is_active ? (
-                              <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => setUserToDeactivate(user)}
-                              >
-                                Deaktivieren
-                              </Button>
-                          ) : (
-                              <Button
-                                  className="bg-green-500 hover:bg-green-600"
-                                  size="sm"
-                                  onClick={() => setUserToActivate(user)}
-                              >
-                                Freischalten
-                              </Button>
-                          )}
-                        </div>
-                      </div>
-                  ))}
-
-                  {users.length === 0 && (
-                      <div className="text-center p-4 border rounded-lg">
-                        Keine Benutzer gefunden.
-                      </div>
-                  )}
+            <div className="space-y-4">
+              {/* Filteroptionen und Suchleiste */}
+              <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Input
+                        placeholder="Nach Name oder E-Mail suchen..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        className="pr-10"
+                    />
+                    {searchTerm && (
+                        <button
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            onClick={clearSearch}
+                        >
+                          ✕
+                        </button>
+                    )}
+                  </div>
                 </div>
-            )}
+                <Tabs defaultValue="all" value={activeFilter} onValueChange={handleFilterChange} className="w-full md:w-auto">
+                  <TabsList className="grid grid-cols-4 w-full">
+                    <TabsTrigger value="all">Alle</TabsTrigger>
+                    <TabsTrigger value="admin">Admins</TabsTrigger>
+                    <TabsTrigger value="active">Aktive</TabsTrigger>
+                    <TabsTrigger value="pending">Wartend</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              {loading ? (
+                  <div className="text-center py-4">Laden...</div>
+              ) : (
+                  <div className="space-y-4">
+                    {filteredUsers.length > 0 ? (
+                        filteredUsers.map((user) => (
+                            <div key={user.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg gap-3">
+                              <div className="grid gap-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{user.name}</span>
+                                  {user.is_admin ? (
+                                      <Badge className="bg-blue-500">Admin</Badge>
+                                  ) : null}
+                                </div>
+                                <div className="text-sm text-muted-foreground truncate max-w-[250px]">
+                                  {user.email}
+                                </div>
+                                <div className="mt-1">
+                                  {user.is_active ? (
+                                      <Badge className="bg-green-500">Aktiv</Badge>
+                                  ) : (
+                                      <Badge variant="outline" className="text-orange-500 border-orange-500">
+                                        Warten auf Freischaltung
+                                      </Badge>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex justify-end">
+                                {user.is_active ? (
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={() => setUserToDeactivate(user)}
+                                    >
+                                      Deaktivieren
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        className="bg-green-500 hover:bg-green-600"
+                                        size="sm"
+                                        onClick={() => setUserToActivate(user)}
+                                    >
+                                      Freischalten
+                                    </Button>
+                                )}
+                              </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center p-4 border rounded-lg">
+                          {searchTerm ? 'Keine Benutzer gefunden, die dem Suchbegriff entsprechen.' : 'Keine Benutzer gefunden.'}
+                        </div>
+                    )}
+                  </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
