@@ -26,7 +26,7 @@ export async function GET() {
     }
 
     try {
-      const decoded = verify(token, process.env.JWT_SECRET!) as TokenPayload
+      const decoded = verify(token, process.env.JWT_SECRET!) as TokenPayload;
       if (!decoded.isAdmin) {
         return NextResponse.json({ error: 'Nur Administratoren können Platzsperren verwalten' }, { status: 403 })
       }
@@ -34,7 +34,7 @@ export async function GET() {
       // Alle Platzsperren holen
       const blocks = await db.all('SELECT * FROM court_blocks ORDER BY start_date DESC')
       return NextResponse.json(blocks)
-    } catch (error) {
+    } catch {
       return NextResponse.json({ error: 'Ungültiges Token' }, { status: 401 })
     }
   } catch (error) {
@@ -83,8 +83,8 @@ export async function POST(request: Request) {
 
       // Erstelle die Platzsperre
       const result2 = await db.run(
-          `INSERT INTO court_blocks (court_id, start_date, end_date, reason) 
-         VALUES (?, ?, ?, ?)`,
+          `INSERT INTO court_blocks (court_id, start_date, end_date, reason)
+           VALUES (?, ?, ?, ?)`,
           [courtId, startDate, endDate, reason]
       )
 

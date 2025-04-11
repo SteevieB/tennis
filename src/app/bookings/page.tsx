@@ -180,7 +180,7 @@ export default function BookingsPage() {
   };
 
   // Prüft, ob ein Zeitslot für den ausgewählten Platz geblockt ist
-  const isTimeSlotBlocked = (timeSlot: string) => {
+  const isTimeSlotBlocked = () => {
     // Überprüfe, ob der ausgewählte Platz für das ausgewählte Datum gesperrt ist
     return courtBlocks.length > 0;
   };
@@ -295,7 +295,7 @@ export default function BookingsPage() {
                     (b) => b.start_time <= slot && b.end_time > slot
                 )
                 const isBooked = !!booking
-                const isBlocked = isTimeSlotBlocked(slot)
+                const isBlocked = isTimeSlotBlocked()
                 const blockReason = getBlockReason()
 
                 return (

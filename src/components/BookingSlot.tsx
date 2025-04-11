@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Booking, User, CourtBlock } from '@/types';
+import { Booking, User } from '@/types';
 
 function getEndTime(slot: string) {
     // Extrahiere Stunden und Minuten aus dem Zeitstring
@@ -104,15 +104,12 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
         }
         return 'Belegt';
     };
-
-    const isBookable = !isBooked && !isBlocked;
-
     return (
         <div className="relative">
             <button
                 className={`w-full p-3 rounded-lg font-medium transition-colors ${getSlotStyle()}`}
                 onClick={() => !isBooked && currentUser && (isAdmin || !isBlocked) && handleBook()}
-                disabled={(isBooked || isBlocked) && !isAdmin}
+                disabled={isBooked || (isBlocked && !isAdmin)}
                 title={isBlocked && !isAdmin ? "Platz gesperrt" : ""}
             >
                 <div className="flex flex-col items-center space-y-1">

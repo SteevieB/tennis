@@ -1,7 +1,7 @@
 // /src/app/admin/settings/page.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import {useState, useEffect, useCallback} from 'react'
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -58,12 +58,7 @@ export default function AdminSettingsPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  useEffect(() => {
-    fetchSettings()
-    fetchCourtBlocks()
-  }, [])
-
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
       const response = await fetch('/api/settings')
       if (response.ok) {
@@ -84,9 +79,9 @@ export default function AdminSettingsPage() {
         variant: "destructive"
       })
     }
-  }
+  }, [toast])
 
-  const fetchCourtBlocks = async () => {
+  const fetchCourtBlocks = useCallback(async () => {
     try {
       const response = await fetch('/api/court-blocks')
       if (response.ok) {
@@ -107,7 +102,12 @@ export default function AdminSettingsPage() {
         variant: "destructive"
       })
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    fetchSettings()
+    fetchCourtBlocks()
+  }, [fetchSettings, fetchCourtBlocks])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
