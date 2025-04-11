@@ -32,14 +32,42 @@ async function openDb(): Promise<Database> {
         FOREIGN KEY (user_id) REFERENCES users(id)
         );
 
+      CREATE TABLE IF NOT EXISTS court_blocks (
+                                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                court_id INTEGER NOT NULL,
+                                                start_date TEXT NOT NULL,
+                                                end_date TEXT NOT NULL,
+                                                reason TEXT NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS settings (
-                                            key TEXT PRIMARY KEY,
-                                            value TEXT,
-                                            updated_at TEXT,
-                                            updated_by INTEGER,
-                                            FOREIGN KEY (updated_by) REFERENCES users(id)
-        );
+                                            maxBookingDuration INTEGER DEFAULT 60,
+                                            advanceBookingPeriod INTEGER DEFAULT 14,
+                                            maxSimultaneousBookings INTEGER DEFAULT 3,
+                                            openingTime TEXT DEFAULT '08:00',
+                                            closingTime TEXT DEFAULT '22:00',
+                                            maintenanceDay TEXT DEFAULT 'monday',
+                                            maintenanceTime TEXT DEFAULT '06:00',
+                                            autoCleanupDays INTEGER DEFAULT 7
+      );
     `)
+
+    // Überprüfe, ob Einstellungen vorhanden sind, falls nicht, füge Standardeinstellungen ein
+    const settingsExist = await dbConnection.get('SELECT 1 FROM settings LIMIT 1')
+    if (!settingsExist) {
+      await dbConnection.run(`
+        INSERT INTO settings (
+          maxBookingDuration,
+          advanceBookingPeriod,
+          maxSimultaneousBookings,
+          openingTime,
+          closingTime,
+          maintenanceDay,
+          maintenanceTime,
+          autoCleanupDays
+        ) VALUES (60, 14, 3, '08:00', '22:00', 'monday', '06:00', 7)
+      `)
+    }
   }
   return dbConnection
 }
@@ -53,15 +81,15 @@ export const db = {
     return dbInstance.get<T>(sql, params)
   },
 
-    async all<T = unknown>(sql: string, params: SqlParams = []): Promise<T[]> {
-        const dbInstance = await openDb()
-        return dbInstance.all<T[]>(sql, params) as Promise<T[]>
-    },
+  async all<T = unknown>(sql: string, params: SqlParams = []): Promise<T[]> {
+    const dbInstance = await openDb()
+    return dbInstance.all<T[]>(sql, params) as Promise<T[]>
+  },
 
-    async run(sql: string, params: SqlParams = []): Promise<sqlite3.RunResult> {
-        const dbInstance = await openDb()
-        return dbInstance.run(sql, params) as unknown as sqlite3.RunResult
-    },
+  async run(sql: string, params: SqlParams = []): Promise<sqlite3.RunResult> {
+    const dbInstance = await openDb()
+    return dbInstance.run(sql, params) as unknown as sqlite3.RunResult
+  },
 
   async exec(sql: string): Promise<void> {
     const dbInstance = await openDb()

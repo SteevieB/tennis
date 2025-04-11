@@ -222,9 +222,11 @@ export async function POST(request: Request) {
 
       // Überprüfe ob der Zeitslot blockiert ist
       const isBlocked = await isTimeSlotBlocked(courtId, date, startTime)
-      if (isBlocked) {
+
+      // Wenn der Platz gesperrt ist und der Benutzer kein Admin ist, verhindere die Buchung
+      if (isBlocked && !decoded.isAdmin) {
         return NextResponse.json(
-            { error: 'Dieser Zeitslot ist nicht verfügbar' },
+            { error: 'Dieser Platz ist für den angegebenen Zeitraum gesperrt' },
             { status: 400 }
         )
       }

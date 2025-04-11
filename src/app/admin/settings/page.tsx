@@ -16,12 +16,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface CourtBlock {
   id: number
-  courtId: number
-  startDate: string
-  endDate: string
+  court_id: number
+  start_date: string
+  end_date: string
   reason: string
 }
 
@@ -29,8 +39,8 @@ export default function AdminSettingsPage() {
   const { toast } = useToast()
   const [settings, setSettings] = useState({
     maxBookingDuration: '60',
-    advanceBookingPeriod: '',
-    maxSimultaneousBookings: '',
+    advanceBookingPeriod: '14',
+    maxSimultaneousBookings: '3',
     openingTime: '08:00',
     closingTime: '22:00',
     maintenanceDay: 'monday',
@@ -39,12 +49,14 @@ export default function AdminSettingsPage() {
   })
 
   const [courtBlocks, setCourtBlocks] = useState<CourtBlock[]>([])
+  const [blockToDelete, setBlockToDelete] = useState<CourtBlock | null>(null)
   const [newBlock, setNewBlock] = useState({
     courtId: 1,
     startDate: new Date(),
     endDate: new Date(),
     reason: ''
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     fetchSettings()
@@ -52,35 +64,80 @@ export default function AdminSettingsPage() {
   }, [])
 
   const fetchSettings = async () => {
-    const response = await fetch('/api/settings')
-    if (response.ok) {
-      const data = await response.json()
-      setSettings(data)
+    try {
+      const response = await fetch('/api/settings')
+      if (response.ok) {
+        const data = await response.json()
+        setSettings(data)
+      } else {
+        toast({
+          title: "Fehler beim Laden der Einstellungen",
+          description: "Die Einstellungen konnten nicht geladen werden.",
+          variant: "destructive"
+        })
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Einstellungen:', error)
+      toast({
+        title: "Fehler beim Laden der Einstellungen",
+        description: "Bitte versuche es später erneut.",
+        variant: "destructive"
+      })
     }
   }
 
   const fetchCourtBlocks = async () => {
-    const response = await fetch('/api/court-blocks')
-    if (response.ok) {
-      const data = await response.json()
-      setCourtBlocks(data)
+    try {
+      const response = await fetch('/api/court-blocks')
+      if (response.ok) {
+        const data = await response.json()
+        setCourtBlocks(data)
+      } else {
+        toast({
+          title: "Fehler beim Laden der Platzsperren",
+          description: "Die Platzsperren konnten nicht geladen werden.",
+          variant: "destructive"
+        })
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Platzsperren:', error)
+      toast({
+        title: "Fehler beim Laden der Platzsperren",
+        description: "Bitte versuche es später erneut.",
+        variant: "destructive"
+      })
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const response = await fetch('/api/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settings),
-    })
-
-    if (response.ok) {
-      toast({
-        title: "Einstellungen gespeichert",
-        description: "Die Änderungen wurden erfolgreich übernommen."
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          maxBookingDuration: parseInt(settings.maxBookingDuration),
+          advanceBookingPeriod: parseInt(settings.advanceBookingPeriod),
+          maxSimultaneousBookings: parseInt(settings.maxSimultaneousBookings),
+          openingTime: settings.openingTime,
+          closingTime: settings.closingTime,
+          maintenanceDay: settings.maintenanceDay,
+          maintenanceTime: settings.maintenanceTime,
+          autoCleanupDays: parseInt(settings.autoCleanupDays)
+        }),
       })
-    } else {
+
+      if (response.ok) {
+        toast({
+          title: "Einstellungen gespeichert",
+          description: "Die Änderungen wurden erfolgreich übernommen."
+        })
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Unbekannter Fehler')
+      }
+    } catch (error) {
+      console.error('Fehler beim Speichern der Einstellungen:', error)
       toast({
         title: "Fehler beim Speichern",
         description: "Bitte versuchen Sie es erneut.",
@@ -90,44 +147,102 @@ export default function AdminSettingsPage() {
   }
 
   const handleAddBlock = async () => {
-    const response = await fetch('/api/court-blocks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        courtId: newBlock.courtId,
-        startDate: newBlock.startDate.toISOString().split('T')[0],
-        endDate: newBlock.endDate.toISOString().split('T')[0],
-        reason: newBlock.reason
-      }),
-    })
+    try {
+      if (!newBlock.reason.trim()) {
+        toast({
+          title: "Fehler",
+          description: "Bitte geben Sie einen Grund für die Sperrung an.",
+          variant: "destructive"
+        })
+        return
+      }
 
-    if (response.ok) {
-      toast({
-        title: "Sperrzeit hinzugefügt",
-        description: "Der Platz wurde für den angegebenen Zeitraum gesperrt."
+      setIsSubmitting(true)
+
+      // Formatiere Datum zu ISO String (YYYY-MM-DD)
+      const startDateStr = newBlock.startDate.toISOString().split('T')[0]
+      const endDateStr = newBlock.endDate.toISOString().split('T')[0]
+
+      const response = await fetch('/api/court-blocks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courtId: newBlock.courtId,
+          startDate: startDateStr,
+          endDate: endDateStr,
+          reason: newBlock.reason
+        }),
       })
-      fetchCourtBlocks()
-    } else {
+
+      if (response.ok) {
+        toast({
+          title: "Sperrzeit hinzugefügt",
+          description: "Der Platz wurde für den angegebenen Zeitraum gesperrt."
+        })
+
+        // Setze Formular zurück
+        setNewBlock({
+          courtId: 1,
+          startDate: new Date(),
+          endDate: new Date(),
+          reason: ''
+        })
+
+        // Aktualisiere die Liste der Sperrzeiten
+        await fetchCourtBlocks()
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Unbekannter Fehler')
+      }
+    } catch (error) {
+      console.error('Fehler beim Hinzufügen der Sperrzeit:', error)
       toast({
         title: "Fehler beim Sperren",
         description: "Bitte versuchen Sie es erneut.",
         variant: "destructive"
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  const handleDeleteBlock = async (blockId: number) => {
-    const response = await fetch(`/api/court-blocks?id=${blockId}`, {
-      method: 'DELETE'
-    })
+  const handleConfirmDelete = async () => {
+    try {
+      if (!blockToDelete) return
 
-    if (response.ok) {
-      toast({
-        title: "Sperrzeit entfernt",
-        description: "Die Sperrzeit wurde erfolgreich entfernt."
+      const response = await fetch(`/api/court-blocks?id=${blockToDelete.id}`, {
+        method: 'DELETE'
       })
-      fetchCourtBlocks()
+
+      if (response.ok) {
+        toast({
+          title: "Sperrzeit entfernt",
+          description: "Die Sperrzeit wurde erfolgreich entfernt."
+        })
+        setBlockToDelete(null)
+        await fetchCourtBlocks()
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Unbekannter Fehler')
+      }
+    } catch (error) {
+      console.error('Fehler beim Löschen der Sperrzeit:', error)
+      toast({
+        title: "Fehler beim Löschen",
+        description: "Die Sperrzeit konnte nicht gelöscht werden.",
+        variant: "destructive"
+      })
+      setBlockToDelete(null)
     }
+  }
+
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }
+    return new Date(dateString).toLocaleDateString('de-DE', options)
   }
 
   return (
@@ -294,6 +409,7 @@ export default function AdminSettingsPage() {
                             mode="single"
                             selected={newBlock.startDate}
                             onSelect={(date) => date && setNewBlock({ ...newBlock, startDate: date })}
+                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                         />
                       </div>
 
@@ -303,11 +419,17 @@ export default function AdminSettingsPage() {
                             mode="single"
                             selected={newBlock.endDate}
                             onSelect={(date) => date && setNewBlock({ ...newBlock, endDate: date })}
+                            disabled={(date) => date < newBlock.startDate}
                         />
                       </div>
                     </div>
 
-                    <Button onClick={handleAddBlock}>Sperrzeit hinzufügen</Button>
+                    <Button
+                        onClick={handleAddBlock}
+                        disabled={isSubmitting || !newBlock.reason.trim()}
+                    >
+                      {isSubmitting ? 'Wird hinzugefügt...' : 'Sperrzeit hinzufügen'}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -318,30 +440,60 @@ export default function AdminSettingsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {courtBlocks.map((block) => (
-                        <div key={block.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <p className="font-medium">Platz {block.courtId}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(block.startDate).toLocaleDateString()} bis {new Date(block.endDate).toLocaleDateString()}
-                            </p>
-                            <p className="text-sm text-muted-foreground">Grund: {block.reason}</p>
-                          </div>
-                          <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteBlock(block.id)}
-                          >
-                            Löschen
-                          </Button>
+                    {courtBlocks.length > 0 ? (
+                        courtBlocks.map((block) => (
+                            <div key={block.id} className="flex items-center justify-between p-4 border rounded-lg">
+                              <div>
+                                <p className="font-medium">Platz {block.court_id}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {formatDate(block.start_date)} bis {formatDate(block.end_date)}
+                                </p>
+                                <p className="text-sm text-muted-foreground">Grund: {block.reason}</p>
+                              </div>
+                              <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => setBlockToDelete(block)}
+                              >
+                                Löschen
+                              </Button>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center p-4 border rounded-lg text-muted-foreground">
+                          Keine aktiven Platzsperrungen vorhanden.
                         </div>
-                    ))}
+                    )}
                   </div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Bestätigungsdialog für das Löschen einer Platzsperre */}
+        <AlertDialog
+            open={!!blockToDelete}
+            onOpenChange={(open) => !open && setBlockToDelete(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Sperrzeit löschen</AlertDialogTitle>
+              <AlertDialogDescription>
+                Möchtest du die Sperrzeit für Platz {blockToDelete?.court_id} vom {blockToDelete ? formatDate(blockToDelete.start_date) : ''} bis {blockToDelete ? formatDate(blockToDelete.end_date) : ''} wirklich löschen?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+              <AlertDialogAction
+                  onClick={handleConfirmDelete}
+                  className="bg-destructive hover:bg-destructive/90"
+              >
+                Löschen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
   )
 }

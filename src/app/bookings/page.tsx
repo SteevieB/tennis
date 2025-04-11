@@ -8,19 +8,12 @@ import BookingSlot from "@/components/BookingSlot"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import { Booking, User } from '@/types';
-
-interface Settings {
-  openingTime?: string;
-  closingTime?: string;
-  maintenanceDay?: string;
-  maintenanceTime?: string;
-}
+import { Booking, User, CourtBlock, Settings } from '@/types';
 
 const courts = [
   { id: 1, name: '1' },
-  { id: 2, name: '3' }, // Nummerierung so im Pachtvertrag
-  { id: 3, name: '2' },
+  { id: 2, name: '2' },
+  { id: 3, name: '3' },
 ]
 
 // Funktion zum Generieren von Timeslots basierend auf Öffnungs- und Schließzeiten
@@ -54,6 +47,7 @@ export default function BookingsPage() {
   const [selectedDate, setSelectedDate] = useState(today)
   const [selectedCourt, setSelectedCourt] = useState(courts[0])
   const [bookings, setBookings] = useState<Booking[]>([])
+  const [courtBlocks, setCourtBlocks] = useState<CourtBlock[]>([])
   const [settings, setSettings] = useState<Settings | null>(null)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const router = useRouter()
@@ -79,14 +73,17 @@ export default function BookingsPage() {
       if (response.ok) {
         const data = await response.json()
         setBookings(data.bookings || [])
+        setCourtBlocks(data.blocks || [])
         setSettings(data.settings || null)
       } else {
         setBookings([])
+        setCourtBlocks([])
         setSettings(null)
       }
     } catch (error) {
       console.error('Error fetching bookings:', error)
       setBookings([])
+      setCourtBlocks([])
       setSettings(null)
     }
   }, [selectedCourt, selectedDate, currentUser])
@@ -126,7 +123,7 @@ export default function BookingsPage() {
       if (response.ok) {
         toast({
           title: "Buchung erfolgreich!",
-          description: `Platz ${selectedCourt.id} wurde für ${formattedDate} um ${startTime} Uhr gebucht.`,
+          description: `Platz ${selectedCourt.name} wurde für ${formattedDate} um ${startTime} Uhr gebucht.`,
         })
         await fetchBookings()
       } else {
@@ -182,6 +179,20 @@ export default function BookingsPage() {
     return currentUser?.isAdmin || booking.user_id === currentUser?.id;
   };
 
+  // Prüft, ob ein Zeitslot für den ausgewählten Platz geblockt ist
+  const isTimeSlotBlocked = (timeSlot: string) => {
+    // Überprüfe, ob der ausgewählte Platz für das ausgewählte Datum gesperrt ist
+    return courtBlocks.length > 0;
+  };
+
+  // Suche nach dem Sperrgrund für den aktuellen Platz
+  const getBlockReason = () => {
+    if (courtBlocks.length > 0) {
+      return courtBlocks[0].reason;
+    }
+    return undefined;
+  };
+
   return (
       <div className="space-y-8">
         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -208,20 +219,48 @@ export default function BookingsPage() {
                     </div>
                   </div>
                 </div>
-                <div className="col-span-1"></div>
-                {courts.map((court) => (
-                    <Button
-                        key={court.id}
-                        variant={selectedCourt.id === court.id ? "default" : "outline"}
-                        className="h-24"
-                        onClick={() => setSelectedCourt(court)}
-                    >
-                      <div className="flex flex-col items-center space-y-2">
-                        <CircleDot className="w-8 h-8" />
-                        <span className="font-medium">Platz {court.name}</span>
-                      </div>
-                    </Button>
-                ))}
+
+                {/* Platz 1 oben */}
+                <div className="col-span-2">
+                  <Button
+                      variant={selectedCourt.id === 1 ? "default" : "outline"}
+                      className="h-24 w-full"
+                      onClick={() => setSelectedCourt(courts[0])}
+                  >
+                    <div className="flex flex-col items-center space-y-2">
+                      <CircleDot className="w-8 h-8" />
+                      <span className="font-medium">Platz 1</span>
+                    </div>
+                  </Button>
+                </div>
+
+                {/* Platz 3 unten links // Nummerierung so im Pachtvertrag */}
+                <div className="col-span-1">
+                  <Button
+                      variant={selectedCourt.id === 3 ? "default" : "outline"}
+                      className="h-24 w-full"
+                      onClick={() => setSelectedCourt(courts[2])}
+                  >
+                    <div className="flex flex-col items-center space-y-2">
+                      <CircleDot className="w-8 h-8" />
+                      <span className="font-medium">Platz 3</span>
+                    </div>
+                  </Button>
+                </div>
+
+                {/* Platz 2 unten rechts // Nummerierung so im Pachtvertrag */}
+                <div className="col-span-1">
+                  <Button
+                      variant={selectedCourt.id === 2 ? "default" : "outline"}
+                      className="h-24 w-full"
+                      onClick={() => setSelectedCourt(courts[1])}
+                  >
+                    <div className="flex flex-col items-center space-y-2">
+                      <CircleDot className="w-8 h-8" />
+                      <span className="font-medium">Platz 2</span>
+                    </div>
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -256,6 +295,8 @@ export default function BookingsPage() {
                     (b) => b.start_time <= slot && b.end_time > slot
                 )
                 const isBooked = !!booking
+                const isBlocked = isTimeSlotBlocked(slot)
+                const blockReason = getBlockReason()
 
                 return (
                     <BookingSlot
@@ -263,6 +304,8 @@ export default function BookingsPage() {
                         slot={slot}
                         booking={booking}
                         isBooked={isBooked}
+                        isBlocked={isBlocked}
+                        blockReason={blockReason}
                         currentUser={currentUser}
                         onBook={handleBooking}
                         onCancel={handleCancelBooking}

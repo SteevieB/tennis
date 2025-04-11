@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Lock } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogContent,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Booking, User } from '@/types';
+import { Booking, User, CourtBlock } from '@/types';
 
 function getEndTime(slot: string) {
     // Extrahiere Stunden und Minuten aus dem Zeitstring
@@ -28,6 +28,8 @@ interface BookingSlotProps {
     slot: string;
     booking: Booking | null | undefined;
     isBooked: boolean;
+    isBlocked: boolean;
+    blockReason?: string;
     currentUser: User | null;
     onBook: (slot: string, type: string) => void;
     onCancel: (bookingId: number) => void;
@@ -38,18 +40,22 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
                                                      slot,
                                                      booking,
                                                      isBooked,
+                                                     isBlocked,
+                                                     blockReason,
                                                      currentUser,
                                                      onBook,
                                                      onCancel,
                                                      canCancel
-                     }) => {
+                                                 }) => {
     const [isOpen, setIsOpen] = React.useState(false);
     const [selectedType, setSelectedType] = React.useState('regular');
 
     const isOwnBooking = currentUser && booking && booking.user_id === currentUser.id;
     const bookingType = booking?.type || 'regular';
+    const isAdmin = currentUser?.isAdmin || false;
+
     const handleBook = () => {
-        if (currentUser?.isAdmin) {
+        if (isAdmin) {
             setIsOpen(true);
         } else {
             onBook(slot, 'regular');
@@ -62,6 +68,9 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
     };
 
     const getSlotStyle = () => {
+        if (isBlocked) {
+            return 'bg-yellow-500 hover:bg-yellow-600 text-white';
+        }
         if (!isBooked) {
             return 'bg-green-500 hover:bg-green-600 text-white';
         }
@@ -78,6 +87,9 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
     };
 
     const getBookingStatus = () => {
+        if (isBlocked) {
+            return blockReason || 'Gesperrt';
+        }
         if (!isBooked) {
             return 'Verfügbar';
         }
@@ -93,12 +105,15 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
         return 'Belegt';
     };
 
+    const isBookable = !isBooked && !isBlocked;
+
     return (
         <div className="relative">
             <button
                 className={`w-full p-3 rounded-lg font-medium transition-colors ${getSlotStyle()}`}
-                onClick={() => !isBooked && currentUser && handleBook()}
-                disabled={isBooked || !currentUser}
+                onClick={() => !isBooked && currentUser && (isAdmin || !isBlocked) && handleBook()}
+                disabled={(isBooked || isBlocked) && !isAdmin}
+                title={isBlocked && !isAdmin ? "Platz gesperrt" : ""}
             >
                 <div className="flex flex-col items-center space-y-1">
                     <span className="text-lg">{slot} - {getEndTime(slot)}</span>
@@ -108,6 +123,7 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
                             booking?.user_name && <span className="text-sm font-normal">{booking.user_name}</span>
                         ) : (<span className="text-sm"></span>)
                     )}
+                    {isBlocked && <Lock className="w-4 h-4 mt-1" />}
                 </div>
             </button>
 
@@ -126,7 +142,9 @@ const BookingSlot: React.FC<BookingSlotProps> = ({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Neue Buchung</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Wählen Sie den Buchungstyp für {slot} Uhr
+                            {isBlocked ?
+                                `Dieser Platz ist gesperrt (${blockReason}). Als Admin kannst du trotzdem buchen.` :
+                                `Wähle den Buchungstyp für ${slot} Uhr`}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="py-4">
